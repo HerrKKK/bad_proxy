@@ -20,7 +20,7 @@ class BadProxy(object):
         代理核心程序
         参数：socket_client 代理端与客户端之间建立的套接字
         """
-        server_host, server_port = self.inbound.http_connect()
+        server_host, server_port = self.inbound.connect()
 
         if self.outbound.protocol == ProtocolType.FREEDOM:
             self.outbound.connect(server_host, server_port)

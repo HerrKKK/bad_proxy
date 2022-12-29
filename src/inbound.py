@@ -1,8 +1,8 @@
 import socket
 
 from protocol import ProtocolType
-from net_utils import HttpRequestPacket
 from config import InboundConfig
+from application_layer import HTTP, BTP
 
 
 class Inbound:
@@ -42,28 +42,9 @@ class Inbound:
         self.socket, _ = self.socket_proxy.accept()
         return self.socket
 
-    def http_connect(self) -> (str, int):
-        req_data = self.socket.recv(self.socket_recv_buf_size)
-        if req_data == b'':
-            return
-
-        # 解析http请求数据
-        http_packet = HttpRequestPacket(req_data)
-
-        # HTTP
-        # if http_packet.method in [b'GET', b'POST', b'PUT', b'DELETE', b'HEAD']:
-        #     pass
-        # HTTPS，会先通过CONNECT方法建立TCP连接
-        if http_packet.method == b'CONNECT':
-            success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \
-                          % (http_packet.version, 200)
-            self.socket.send(success_msg)  # 完成连接，通知客户端
-            # 客户端得知连接建立，会将真实请求数据发送给代理服务端
-
-        # 获取服务端host、port
-        if b':' in http_packet.host:
-            server_host, server_port = http_packet.host.split(b':')
-        else:
-            server_host, server_port = http_packet.host, 80
-
-        return server_host, server_port
+    def connect(self):
+        match self.protocol:
+            case ProtocolType.HTTP:
+                return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)
+            case ProtocolType.BTP:
+                return BTP.inbound_connect(self.socket, self.socket_recv_buf_size)
