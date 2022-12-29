@@ -2,7 +2,7 @@ import socket
 
 from protocol import ProtocolType
 from config import InboundConfig
-from application_layer import HTTP, BTP
+from application_layer import HTTP, BTP, BTPResponse
 
 
 class Inbound:
@@ -48,3 +48,20 @@ class Inbound:
                 return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)
             case ProtocolType.BTP:
                 return BTP.inbound_connect(self.socket, self.socket_recv_buf_size)
+
+    def recv(self):
+        # decode request to next step, return raw data
+        response_data = self.socket.recv(self.socket_recv_buf_size)
+        match self.protocol:
+            case ProtocolType.HTTP:
+                return response_data
+            case ProtocolType.BTP:
+                return BTPResponse(response_data).payload
+
+    def send(self, raw_data: bytes):
+        # encode response to send
+        match self.protocol:
+            case ProtocolType.HTTP:
+                return self.socket.send(raw_data)
+            case ProtocolType.BTP:
+                return self.socket.send(BTP.encode_response(raw_data))

@@ -46,9 +46,6 @@ class HTTP:
         # 解析http请求数据
         http_packet = HttpRequestPacket(req_data)
 
-        # HTTP
-        # if http_packet.method in [b'GET', b'POST', b'PUT', b'DELETE', b'HEAD']:
-        #     pass
         # HTTPS，会先通过CONNECT方法建立TCP连接
         if http_packet.method == b'CONNECT':
             success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \

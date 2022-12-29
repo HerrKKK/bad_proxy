@@ -42,5 +42,6 @@ def read_config(filename: Optional[str] = 'config.json'):
         config_json = json.loads(text)
         config.inbound_config = InboundConfig(**config_json['inbound'])
         config.outbound_config = OutboundConfig(**config_json['outbound'])
+        print(f'use {filename} as config')
 
     return config
