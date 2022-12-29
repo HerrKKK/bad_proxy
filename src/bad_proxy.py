@@ -1,22 +1,19 @@
-from __future__ import print_function
-
-import socket
 import select
-import _thread as thread
 
 from inbound import Inbound
 from outbound import Outbound
 from protocol import ProtocolType
+from config import Config
 
 
-class SimpleHttpProxy(object):
+class BadProxy(object):
     """
     简单的HTTP代理
     客户端(client) <=> 代理端(proxy) <=> 服务端(server)
     """
-    def __init__(self):
-        self.inbound = Inbound()
-        self.outbound = Outbound()
+    def __init__(self, config: Config):
+        self.inbound = Inbound(config.inbound_config)
+        self.outbound = Outbound(config.outbound_config)
 
     def proxy(self):
         """
@@ -69,20 +66,3 @@ class SimpleHttpProxy(object):
 
         self.inbound.socket.close()
         self.outbound.socket.close()
-
-
-class StartUp:
-    @staticmethod
-    def start():
-        while True:
-            try:
-                instance = SimpleHttpProxy()
-                instance.inbound.socket_accept()
-                thread.start_new_thread(instance.proxy(), ())
-            except KeyboardInterrupt:
-                break
-
-
-if __name__ == '__main__':
-    # 默认参数
-    StartUp.start()

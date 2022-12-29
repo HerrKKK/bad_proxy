@@ -2,6 +2,7 @@ from typing import Optional
 
 from protocol import ProtocolType
 from net_utils import connect_socket
+from config import OutboundConfig
 
 
 class Outbound:
@@ -10,8 +11,10 @@ class Outbound:
     protocol: ProtocolType
     socket: None
 
-    def __init__(self):
-        self.protocol = ProtocolType.FREEDOM
+    def __init__(self, config: OutboundConfig):
+        self.host = config.host
+        self.port = config.port
+        self.protocol = config.protocol
 
     def connect(self,
                 server_host: Optional[str] = None,

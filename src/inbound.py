@@ -1,6 +1,8 @@
 import socket
+
 from protocol import ProtocolType
 from net_utils import HttpRequestPacket
+from config import InboundConfig
 
 
 class Inbound:
@@ -10,25 +12,24 @@ class Inbound:
     socket_proxy: socket
     socket: None
 
-    def __init__(self,
-                 host='127.0.0.1',
-                 port=8888,
-                 listen=10,
-                 buf_size=8,
-                 delay=1):
+    def __init__(self, config: InboundConfig):
+        self.host = config.host
+        self.port = config.port
+        self.protocol = config.protocol
+
         self.socket_proxy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # 将SO_REUSEADDR标记为True, 当socket关闭后，立刻回收该socket的端口
         self.socket_proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket_proxy.bind((host, port))
-        self.socket_proxy.listen(listen)
+        self.socket_proxy.bind((config.host, config.port))
+        self.socket_proxy.listen(10)
 
-        self.socket_recv_buf_size = buf_size * 1024
-        self.delay = delay/1000.0
+        self.socket_recv_buf_size = 8 * 1024
+        self.delay = 1/1000.0
         self.protocol = ProtocolType.HTTP
 
-        print('info', 'bind=%s:%s' % (host, port))
-        print('info', 'listen=%s' % listen)
-        print('info', 'buf_size=%skb, delay=%sms' % (buf_size, delay))
+        print('info', 'bind=%s:%s' % (config.host, config.port))
+        print('info', 'listen=%s' % 10)
+        print('info', 'buf_size=%skb, delay=%sms' % (8, 1))
 
     def __del__(self):
         self.socket_proxy.close()
