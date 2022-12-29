@@ -24,8 +24,8 @@ class BadProxy(object):
 
         if self.outbound.protocol == ProtocolType.FREEDOM:
             self.outbound.connect(server_host, server_port)
-
-        self.outbound.connect()
+        else:
+            self.outbound.connect()
         self.async_listen()
 
         # 使用select异步处理，不阻塞

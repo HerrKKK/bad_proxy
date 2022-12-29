@@ -13,7 +13,7 @@ class StartUp:
             try:
                 instance = BadProxy(config)
                 instance.inbound.socket_accept()
-                thread.start_new_thread(instance.proxy(), ())
+                thread.start_new_thread(instance.proxy, ())
             except KeyboardInterrupt:
                 break
 
