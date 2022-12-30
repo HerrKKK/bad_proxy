@@ -48,11 +48,18 @@ class HTTP:
         # 解析http请求数据
         http_packet = HttpRequestPacket(req_data)
 
+        # 修正http请求数据
+        tmp = b'%s//%s' % (http_packet.req_uri.split(b'//')[0], http_packet.host)
+        req_data = req_data.replace(tmp, b'')
+
+        # HTTP
+        if http_packet.method in [b'GET', b'POST', b'PUT', b'DELETE', b'HEAD']:
+            pass
         # HTTPS，会先通过CONNECT方法建立TCP连接
         if http_packet.method == b'CONNECT':
             success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \
                           % (http_packet.version, 200)
-            # print('https connected')
+            print('https connected')
             client_socket.send(success_msg)  # 完成连接，通知客户端
             # 客户端得知连接建立，会将真实请求数据发送给代理服务端
 
@@ -64,4 +71,4 @@ class HTTP:
 
         if isinstance(server_port, bytes):
             server_port = int(server_port.decode())
-        return server_host.decode(), server_port, http_packet.req_data
+        return server_host.decode(), server_port, req_data

@@ -59,6 +59,7 @@ class Outbound:
                 self.socket.send(BTP.encode_request(self.target_host,
                                                     self.target_port,
                                                     raw_data))
+                return
             case ProtocolType.FREEDOM:
                 self.socket.send(raw_data)
                 return

@@ -9,7 +9,7 @@ class Inbound:
     host: str
     port: int
     protocol: ProtocolType
-    socket: None
+    socket: socket
 
     def __init__(self, config: InboundConfig):
         self.host = config.host
