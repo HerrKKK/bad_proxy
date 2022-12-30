@@ -39,7 +39,7 @@ class HTTP:
     @staticmethod
     def inbound_connect(client_socket: socket,
                         buf_size: Optional[int] = 8192) -> (str, int):
-        print(f'inbound http connecting, buf size is {buf_size}')
+        # print(f'inbound http connecting, buf size is {buf_size}')
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
             print('inbound received none data')
@@ -52,7 +52,7 @@ class HTTP:
         if http_packet.method == b'CONNECT':
             success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \
                           % (http_packet.version, 200)
-            print('https connected')
+            # print('https connected')
             client_socket.send(success_msg)  # 完成连接，通知客户端
             # 客户端得知连接建立，会将真实请求数据发送给代理服务端
 
