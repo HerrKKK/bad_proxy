@@ -3,7 +3,6 @@ from typing import Optional
 from protocol import ProtocolType
 from net_utils import connect_socket
 from config import OutboundConfig
-from application_layer import BTP, BTPResponse
 
 
 class Outbound:
@@ -32,6 +31,7 @@ class Outbound:
         else:
             print(f'outbound connect to assigned {self.host}: {self.port}')
             self.socket = connect_socket(self.host, self.port)
+        # whether to send the first package
         if payload is not None:
             self.send(payload)
 
@@ -42,7 +42,8 @@ class Outbound:
             case ProtocolType.HTTP:
                 return response_data
             case ProtocolType.BTP:
-                return BTPResponse(response_data).payload
+                return response_data
+                # return BTPResponse(response_data).payload
             case ProtocolType.FREEDOM:
                 # print('freedom data: ', response_data)
                 return response_data
@@ -55,10 +56,11 @@ class Outbound:
                 self.socket.send(raw_data)
                 return
             case ProtocolType.BTP:
+                self.socket.send(raw_data)
                 # host not right! use those from http request!
-                self.socket.send(BTP.encode_request(self.target_host,
-                                                    self.target_port,
-                                                    raw_data))
+                # self.socket.send(BTP.encode_request(self.target_host,
+                #                                     self.target_port,
+                #                                     raw_data))
                 return
             case ProtocolType.FREEDOM:
                 self.socket.send(raw_data)

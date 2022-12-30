@@ -37,7 +37,6 @@ class BTPRequest:
                                        signed=False)
         base += 1
 
-        # socket.inet_ntoa(data[base: base + 4])
         self.host = data[base: base + self.host_len].decode()
         base += self.host_len
 
@@ -79,8 +78,20 @@ class BTP:
             return
 
         btp_request = BTPRequest(req_data)
-        print('resolve btp request', btp_request.host, btp_request.port)
-        return btp_request.host, btp_request.port, btp_request.payload
+        if btp_request.payload.decode() == 'connect':
+            client_socket.send(BTP.encode_response('connected'.encode()))
+        return btp_request.host, btp_request.port, None  # btp_request.payload
+
+    @staticmethod
+    def outbound_connect(server_socket: socket,
+                         target_host: str,  # tell server to connect target host
+                         target_port: int,
+                         buf_size: Optional[int] = 8192):
+        btp_request = BTP.encode_request(target_host, target_port, 'connect'.encode())
+        server_socket.send(btp_request)
+        resp = server_socket.recv(buf_size)  # verify
+        if BTPResponse(resp).payload.decode() != 'connected':
+            raise Exception('invalid btp connection')
 
     @staticmethod
     def encode_request(host: str,
