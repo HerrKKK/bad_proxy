@@ -1,5 +1,3 @@
-import socket
-
 from typing import Optional
 
 from protocol import ProtocolType
@@ -25,7 +23,7 @@ class Outbound:
                 target_host: str,
                 target_port: int,
                 payload: Optional[bytes] = None):
-        self.target_host = socket.gethostbyname(target_host)
+        self.target_host = target_host  # domain or address
         self.target_port = target_port
 
         if self.protocol == ProtocolType.FREEDOM:
@@ -46,7 +44,7 @@ class Outbound:
             case ProtocolType.BTP:
                 return BTPResponse(response_data).payload
             case ProtocolType.FREEDOM:
-                print('freedom data: ', response_data)
+                # print('freedom data: ', response_data)
                 return response_data
 
     def send(self, raw_data: bytes):

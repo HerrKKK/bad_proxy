@@ -8,6 +8,7 @@ class BTPRequest:
     confusion_msg: bytes
     uuid: str
     directive: int
+    host_len: int
     host: str
     port: int
     payload: bytes
@@ -31,8 +32,14 @@ class BTPRequest:
                                         signed=False)
         base += 1
 
-        self.host = socket.inet_ntoa(data[base: base + 4])
-        base += 4
+        self.host_len = int.from_bytes(data[base: base + 1],
+                                       byteorder='big',
+                                       signed=False)
+        base += 1
+
+        # socket.inet_ntoa(data[base: base + 4])
+        self.host = data[base: base + self.host_len].decode()
+        base += self.host_len
 
         self.port = int.from_bytes(data[base: base + 2],
                                    byteorder='big',
@@ -89,13 +96,15 @@ class BTP:
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
         directive = (0).to_bytes(1, 'big')
         # print(f' outbound btp host {host}, port: {port}')
-        host_bytes = socket.inet_aton(host)
+        host_bytes = host.encode()
+        host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
 
         return confusion_len \
             + confusion \
             + uuid \
             + directive \
+            + host_len \
             + host_bytes \
             + port_bytes \
             + data
