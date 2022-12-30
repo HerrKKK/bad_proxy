@@ -42,7 +42,7 @@ class HTTP:
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
             print('inbound received none data')
-            return
+            return None, None, None
 
         # 解析http请求数据
         http_packet = HttpRequestPacket(req_data)
@@ -60,7 +60,7 @@ class HTTP:
                           % (http_packet.version, 200)
             print('https connected')
             client_socket.send(success_msg)  # 完成连接，通知客户端
-            req_data = None
+            req_data = client_socket.recv(buf_size)
             # 客户端得知连接建立，会将真实请求数据发送给代理服务端
 
         # 获取服务端host、port

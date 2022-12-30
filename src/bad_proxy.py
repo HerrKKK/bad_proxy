@@ -20,6 +20,8 @@ class BadProxy(object):
         参数：socket_client 代理端与客户端之间建立的套接字
         """
         server_host, server_port, payload = self.inbound.connect()
+        if server_host is None or server_port is None:
+            return
         self.outbound.connect(server_host, server_port, payload)
         self.async_listen()
 
@@ -42,20 +44,19 @@ class BadProxy(object):
                     # 接收数据, 按协议解析，inbound解析request，outbound解析response
                     # data = tmp_socket.recv(self.inbound.socket_recv_buf_size)
                     # socket_client状态为readable, 当前接收的数据来自客户端
+                    data = tmp_socket.recv(8192)
                     if tmp_socket is self.inbound.socket:
-                        data = self.inbound.recv()
                         if data == b'':
                             is_recv = False
                             continue
-                        self.outbound.send(data)  # 将客户端请求数据发往服务端
+                        self.outbound.socket.send(data)  # 将客户端请求数据发往服务端
                         # print('proxy', 'client -> server')
 
                     elif tmp_socket is self.outbound.socket:
-                        data = self.outbound.recv()
                         if data == b'':
                             is_recv = False
                             continue
-                        self.inbound.send(data)
+                        self.inbound.socket.send(data)
                         # print('proxy', 'client <- server')
 
                 # time.sleep(self.delay)  # 适当延迟以降低CPU占用

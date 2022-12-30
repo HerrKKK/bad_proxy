@@ -1,4 +1,5 @@
 import socket
+import uuid
 
 from typing import Optional
 
@@ -24,7 +25,7 @@ class BTPRequest:
                                             signed=False)
         base += 1 + self.confusion_len
 
-        self.uuid = data[base: base + 16].decode(encoding='utf-8')
+        self.uuid = uuid.UUID(bytes=data[base: base + 16]).hex
         base += 16
 
         self.directive = int.from_bytes(data[base: base + 16],
@@ -37,7 +38,7 @@ class BTPRequest:
                                        signed=False)
         base += 1
 
-        self.host = data[base: base + self.host_len].decode()
+        self.host = data[base: base + self.host_len].decode(encoding='utf-8')
         base += self.host_len
 
         self.port = int.from_bytes(data[base: base + 2],
@@ -69,28 +70,33 @@ class BTPResponse:
 
 class BTP:
     @staticmethod
-    def inbound_connect(client_socket: socket,
+    def inbound_connect(client_socket: socket,  # inbound socket
                         buf_size: Optional[int] = 8192) -> (str, int):
-        print(f'inbound btp connecting, buf size is {buf_size}')
+        print(f'inbound btp connecting')
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
             print('inbound connecting receiving none data')
-            return
+            return None, None, None
 
         btp_request = BTPRequest(req_data)
-        if btp_request.payload.decode() == 'connect':
-            client_socket.send(BTP.encode_response('connected'.encode()))
-        return btp_request.host, btp_request.port, None  # btp_request.payload
+        req_data = None
+        if btp_request.payload.decode(encoding='utf-8') == 'connect':
+            client_socket.send(BTP.encode_response('connected'
+                                                   .encode(encoding='utf-8')))
+            req_data = client_socket.recv(buf_size)  # listen immediately
+        return btp_request.host.encode(), btp_request.port, req_data  # btp_request.payload
 
     @staticmethod
-    def outbound_connect(server_socket: socket,
+    def outbound_connect(server_socket: socket,  # outbound socket
                          target_host: str,  # tell server to connect target host
                          target_port: int,
                          buf_size: Optional[int] = 8192):
-        btp_request = BTP.encode_request(target_host, target_port, 'connect'.encode())
+        btp_request = BTP.encode_request(target_host,
+                                         target_port,
+                                         'connect'.encode(encoding='utf-8'))
         server_socket.send(btp_request)
         resp = server_socket.recv(buf_size)  # verify
-        if BTPResponse(resp).payload.decode() != 'connected':
+        if BTPResponse(resp).payload.decode(encoding='utf-8') != 'connected':
             raise Exception('invalid btp connection')
 
     @staticmethod
@@ -102,18 +108,19 @@ class BTP:
         """
         confusion = bytes(29)
         confusion_len = (29).to_bytes(1, 'big')
-        uuid = bytes(16)
+        uid = uuid.uuid4().bytes
         # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
         directive = (0).to_bytes(1, 'big')
         # print(f' outbound btp host {host}, port: {port}')
-        host_bytes = host.encode()
+        print(f'host: {host}')
+        host_bytes = host.encode(encoding='utf-8')
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
 
         return confusion_len \
             + confusion \
-            + uuid \
+            + uid \
             + directive \
             + host_len \
             + host_bytes \

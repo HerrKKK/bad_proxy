@@ -3,6 +3,7 @@ from typing import Optional
 from protocol import ProtocolType
 from net_utils import connect_socket
 from config import OutboundConfig
+from application_layer import BTP
 
 
 class Outbound:
@@ -25,12 +26,17 @@ class Outbound:
         self.target_host = target_host  # domain or address
         self.target_port = target_port
 
-        if self.protocol == ProtocolType.FREEDOM:
-            print(f'outbound connect to target {target_host}: {target_port}')
-            self.socket = connect_socket(target_host, target_port)
-        else:
-            print(f'outbound connect to assigned {self.host}: {self.port}')
-            self.socket = connect_socket(self.host, self.port)
+        match self.protocol:
+            case ProtocolType.FREEDOM:
+                print(f'outbound connect to freedom {target_host}: {target_port}')
+                self.socket = connect_socket(target_host, target_port)
+            case ProtocolType.BTP:
+                print(f'outbound connect to btp {self.host}: {self.port}')
+                self.socket = connect_socket(self.host, self.port)
+                BTP.outbound_connect(self.socket, target_host, target_port)
+            case _:
+                self.socket = connect_socket(self.host, self.port)
+
         # whether to send the first package
         if payload is not None:
             self.send(payload)
