@@ -2,7 +2,6 @@ import select
 
 from inbound import Inbound
 from outbound import Outbound
-from protocol import ProtocolType
 from config import Config
 
 
@@ -20,8 +19,8 @@ class BadProxy(object):
         代理核心程序
         参数：socket_client 代理端与客户端之间建立的套接字
         """
-        server_host, server_port = self.inbound.connect()
-        self.outbound.connect(server_host, server_port)
+        server_host, server_port, payload = self.inbound.connect()
+        self.outbound.connect(server_host, server_port, payload)
         self.async_listen()
 
         # 使用select异步处理，不阻塞

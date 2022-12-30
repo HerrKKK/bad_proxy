@@ -62,5 +62,6 @@ class HTTP:
         else:
             server_host, server_port = http_packet.host, 80
 
-        print(f'target host: {server_host}, {server_port}')
-        return server_host.decode(), int(server_port.decode())
+        if isinstance(server_port, bytes):
+            server_port = int(server_port.decode())
+        return server_host.decode(), server_port, http_packet.req_data

@@ -21,7 +21,6 @@ class BTPRequest:
         self.confusion_len = int.from_bytes(data[:1],
                                             byteorder='big',
                                             signed=False)
-        print(f'confusion_len: {self.confusion_len}')
         base += 1 + self.confusion_len
 
         self.uuid = data[base: base + 16].decode(encoding='utf-8')
@@ -74,7 +73,7 @@ class BTP:
 
         btp_request = BTPRequest(req_data)
         print('resolve btp request', btp_request.host, btp_request.port)
-        return btp_request.host, btp_request.port
+        return btp_request.host, btp_request.port, btp_request.payload
 
     @staticmethod
     def encode_request(host: str,
@@ -89,7 +88,7 @@ class BTP:
         # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
         directive = (0).to_bytes(1, 'big')
-        print(f'outbound btp host {host}, port: {port}')
+        # print(f' outbound btp host {host}, port: {port}')
         host_bytes = socket.inet_aton(host)
         port_bytes = port.to_bytes(2, 'big')
 
