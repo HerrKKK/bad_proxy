@@ -39,8 +39,10 @@ class HTTP:
     @staticmethod
     def inbound_connect(client_socket: socket,
                         buf_size: Optional[int] = 8192) -> (str, int):
+        print(f'inbound http connecting, buf size is {buf_size}')
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
+            print('inbound received none data')
             return
 
         # 解析http请求数据
@@ -61,4 +63,4 @@ class HTTP:
             server_host, server_port = http_packet.host, 80
 
         print(f'target host: {server_host}, {server_port}')
-        return server_host, server_port
+        return server_host.decode(), int(server_port.decode())

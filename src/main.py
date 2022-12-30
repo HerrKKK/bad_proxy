@@ -15,7 +15,7 @@ class StartUp:
                 instance.inbound.socket_accept()
                 thread.start_new_thread(instance.proxy, ())
             except KeyboardInterrupt:
-                break
+                sys.exit()
 
 
 if __name__ == '__main__':

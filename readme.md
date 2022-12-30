@@ -20,7 +20,7 @@ Bad Transfer Protocol究竟是什么？
 
 
 ### Bad Transfer Protocol
-| 1 Bytes | X Bytes | 16 Bytes | 1 Bytes | 1 Bytes | 2 Bytes | Y Bytes |
+| 1 Bytes | X Bytes | 16 Bytes | 1 Bytes | 4 Bytes | 2 Bytes | Y Bytes |
 |---------|---------|----------|---------|---------|---------|---------|
 | 混淆字段长度  | 混淆字段    | UUID     | 指令      | IPV4地址  | 端口号     | 数据载荷    |
 

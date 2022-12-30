@@ -21,11 +21,7 @@ class BadProxy(object):
         参数：socket_client 代理端与客户端之间建立的套接字
         """
         server_host, server_port = self.inbound.connect()
-
-        if self.outbound.protocol == ProtocolType.FREEDOM:
-            self.outbound.connect(server_host, server_port)
-        else:
-            self.outbound.connect()
+        self.outbound.connect(server_host, server_port)
         self.async_listen()
 
         # 使用select异步处理，不阻塞

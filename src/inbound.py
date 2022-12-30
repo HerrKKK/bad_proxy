@@ -25,7 +25,6 @@ class Inbound:
 
         self.socket_recv_buf_size = 8 * 1024
         self.delay = 1/1000.0
-        self.protocol = ProtocolType.HTTP
 
         print('info', 'bind=%s:%s' % (config.host, config.port))
         print('info', 'listen=%s' % 10)
@@ -43,6 +42,7 @@ class Inbound:
         return self.socket
 
     def connect(self):
+        print(f'host: {self.host}, port: {self.port}, protocol: {self.protocol}')
         match self.protocol:
             case ProtocolType.HTTP:
                 return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)

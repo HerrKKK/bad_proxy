@@ -3,6 +3,7 @@ class ProtocolType:
     HTTP = 1
     BTP = 2
     FREEDOM = 3
+    BLACKHOLE = 4
 
     @staticmethod
     def interpret_string(protocol_str: str):
@@ -15,5 +16,7 @@ class ProtocolType:
                 return ProtocolType.BTP
             case 'freedom':
                 return ProtocolType.FREEDOM
+            case 'blackhole':
+                return ProtocolType.BLACKHOLE
             case _:
                 raise Exception('NO MATCH PROTOCOL!')

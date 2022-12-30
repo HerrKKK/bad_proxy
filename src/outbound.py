@@ -1,4 +1,4 @@
-from typing import Optional
+import socket
 
 from protocol import ProtocolType
 from net_utils import connect_socket
@@ -11,23 +11,25 @@ class Outbound:
     port: int
     protocol: ProtocolType
     socket: None
+    target_host: str
+    target_port: int
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
-        self.str = config.port
+        self.port = config.port
         self.protocol = config.protocol
 
     def connect(self,
-                server_host: Optional[str] = None,
-                server_port: Optional[int] = None):
-        if server_host is not None and server_port is not None:
-            self.socket = connect_socket(server_host, server_port)
-            if self.socket is None:
-                print('did not connected')
-            else:
-                print(f'outbound connect to {server_host}: {server_port}')
+                target_host: str,
+                target_port: int):
+        self.target_host = socket.gethostbyname(target_host)
+        self.target_port = target_port
+
+        if self.protocol == ProtocolType.FREEDOM:
+            print(f'outbound connect to target {target_host}: {target_port}')
+            self.socket = connect_socket(target_host, target_port)
         else:
-            print('wrong outbound exit')
+            print(f'outbound connect to assigned {self.host}: {self.port}')
             self.socket = connect_socket(self.host, self.port)
 
     def recv(self):
@@ -51,7 +53,8 @@ class Outbound:
                 self.socket.send(raw_data)
                 return
             case ProtocolType.BTP:
-                self.socket.send(BTP.encode_request(self.host,
-                                                    self.port,
+                # host not right! use those from http request!
+                self.socket.send(BTP.encode_request(self.target_host,
+                                                    self.target_port,
                                                     raw_data))
                 return
