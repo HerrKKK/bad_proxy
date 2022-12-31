@@ -41,16 +41,12 @@ class Outbound:
         self.target_host = target_host  # domain or address
         self.target_port = target_port
 
-        match self.protocol:
-            case ProtocolType.FREEDOM:
-                print(f'outbound connect to freedom {target_host}: {target_port}')
-                self.unsafe_socket = connect_socket(target_host, target_port)
-            case ProtocolType.BTP:
-                print(f'outbound connect to btp {self.host}: {self.port}')
-                self.unsafe_socket = connect_socket(self.host, self.port)
-                BTP.outbound_connect(self.socket, target_host, target_port)
-            case _:
-                self.unsafe_socket = connect_socket(self.host, self.port)
+        if self.protocol == ProtocolType.FREEDOM:
+            print(f'outbound connect to {self.target_host}: {self.target_port}')
+            self.unsafe_socket = connect_socket(target_host, target_port)
+        else:
+            print(f'outbound connect to {self.host}: {self.port}')
+            self.unsafe_socket = connect_socket(self.host, self.port)
 
         self.socket = self.unsafe_socket
 
@@ -58,7 +54,11 @@ class Outbound:
             self.socket = self.context.wrap_socket(self.unsafe_socket,
                                                    server_hostname=self.host)
 
-        # whether to send the first package
+        match self.protocol:
+            case ProtocolType.BTP:
+                BTP.outbound_connect(self.socket, target_host, target_port)
+
+        # whether to send the first package from inbound
         if payload is not None:
             self.send(payload)
 
@@ -77,7 +77,6 @@ class Outbound:
 
     def send(self, raw_data: bytes):
         # encode request to outbound host/port
-        # print(f 'outbound send, protocol: {self.protocol}, data: {raw_data}')
         match self.protocol:
             case ProtocolType.HTTP:
                 self.socket.send(raw_data)

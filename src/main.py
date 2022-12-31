@@ -1,4 +1,3 @@
-import os
 import sys
 import ssl
 import socket
@@ -31,6 +30,7 @@ class StartUp:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             self.context.load_cert_chain(config.inbound_config.tls_cert_path,
                                          config.inbound_config.tls_key_path)
+
             self.socket_proxy = self.context.wrap_socket(self.socket_proxy_unsafe,
                                                          server_side=True)
 
@@ -47,7 +47,6 @@ class StartUp:
 
 
 if __name__ == '__main__':
-    print(os.getcwd())
     config_filename = None
     try:
         opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])

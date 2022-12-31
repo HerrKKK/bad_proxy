@@ -72,7 +72,6 @@ class BTP:
     @staticmethod
     def inbound_connect(client_socket: socket,  # inbound socket
                         buf_size: Optional[int] = 8192) -> (str, int):
-        print(f'inbound btp connecting')
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
             print('inbound connecting receiving none data')
@@ -112,8 +111,6 @@ class BTP:
         # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
         directive = (0).to_bytes(1, 'big')
-        # print(f' outbound btp host {host}, port: {port}')
-        print(f'host: {host}')
         host_bytes = host.encode(encoding='utf-8')
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')

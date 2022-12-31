@@ -19,10 +19,6 @@ class Inbound:
         self.socket_recv_buf_size = 8 * 1024
         self.delay = 1/1000.0
 
-        # print('info', 'bind=%s:%s' % (config.host, config.port))
-        # print('info', 'listen=%s' % 10)
-        # print('info', 'buf_size=%skb, delay=%sms' % (8, 1))
-
     def listen(self, socket_proxy: socket):
         """
         获取已经与代理端建立连接的客户端套接字，如无则阻塞，直到可以获取一个建立连接套接字
@@ -31,6 +27,7 @@ class Inbound:
         self.socket, _ = socket_proxy.accept()
 
     def connect(self):
+        print(f'inbound connect to {self.host}: {self.port}')
         match self.protocol:
             case ProtocolType.HTTP:
                 return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)
