@@ -5,8 +5,10 @@
     "protocol": "http"
   },
   "outbound": {
-    "host": "wwr-blog.com",
+    "host": "127.0.0.1",
     "port": 9999,
-    "protocol": "btp"
+    "protocol": "btp",
+    "tls": true,
+    "tls_root_ca_path": "C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\test\\certificate.pem"
   }
 }

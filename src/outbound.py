@@ -1,3 +1,7 @@
+import ssl
+import socket
+
+from ssl import SSLContext
 from typing import Optional
 
 from protocol import ProtocolType
@@ -10,7 +14,10 @@ class Outbound:
     host: str
     port: int
     protocol: ProtocolType
-    socket: None
+    tls: bool
+    unsafe_socket: socket
+    socket: socket
+    context: SSLContext
     target_host: str
     target_port: int
 
@@ -18,6 +25,10 @@ class Outbound:
         self.host = config.host
         self.port = config.port
         self.protocol = config.protocol
+        self.tls = config.tls
+        if self.tls is True:
+            self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            self.context.load_verify_locations('C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\test\\certificate.pem')
 
     def connect(self,
                 target_host: str,
@@ -29,13 +40,19 @@ class Outbound:
         match self.protocol:
             case ProtocolType.FREEDOM:
                 print(f'outbound connect to freedom {target_host}: {target_port}')
-                self.socket = connect_socket(target_host, target_port)
+                self.unsafe_socket = connect_socket(target_host, target_port)
             case ProtocolType.BTP:
                 print(f'outbound connect to btp {self.host}: {self.port}')
-                self.socket = connect_socket(self.host, self.port)
+                self.unsafe_socket = connect_socket(self.host, self.port)
                 BTP.outbound_connect(self.socket, target_host, target_port)
             case _:
-                self.socket = connect_socket(self.host, self.port)
+                self.unsafe_socket = connect_socket(self.host, self.port)
+
+        self.socket = self.unsafe_socket
+
+        if self.tls is True:
+            self.socket = self.context.wrap_socket(self.unsafe_socket,
+                                                   server_hostname='wwr-blog.com')
 
         # whether to send the first package
         if payload is not None:
