@@ -1,3 +1,5 @@
-*.pem
+fullchain.pem
+cert.pem
+privkey.pem
 *.crt
 *.key
