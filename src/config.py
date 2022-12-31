@@ -51,7 +51,7 @@ class Config:
     outbound_config: OutboundConfig
 
 
-def read_config(filename: Optional[str] = 'config.json'):
+def read_config(filename: Optional[str] = 'conf/config.json'):
     if filename is None:
         filename = 'config.json'
 

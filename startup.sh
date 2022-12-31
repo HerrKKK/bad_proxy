@@ -4,4 +4,4 @@ sudo docker run \
     -w /usr/bad_proxy \
     --net=host --restart=always \
     --name bad_proxy -d python:3.10 \
-    python3 src/main.py -c blog_config.json
+    python3 src/main.py -c conf/blog_config.json
