@@ -5,7 +5,7 @@
     "protocol": "http"
   },
   "outbound": {
-    "host": "127.0.0.1",
+    "host": "wwr-blog.com",
     "port": 9999,
     "protocol": "btp"
   }
