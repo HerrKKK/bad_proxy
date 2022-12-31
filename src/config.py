@@ -47,14 +47,16 @@ def read_config(filename: Optional[str] = 'config.json'):
         config_json = json.loads(text)
         config.inbound_config = InboundConfig(**config_json['inbound'])
 
-        # if config.inbound_config.tls is True:
-        #     config.inbound_config.tls_cert_path = config_json['inbound']['tls_cert_path']
-        #     config.inbound_config.tls_key_path = config_json['inbound']['tls_key_path']
+        if config.inbound_config.tls is True \
+            and 'tls_cert_path' in config_json['inbound'] \
+                and 'tls_key_path' in config_json['inbound']:
+            config.inbound_config.tls_cert_path = config_json['inbound']['tls_cert_path']
+            config.inbound_config.tls_key_path = config_json['inbound']['tls_key_path']
 
         config.outbound_config = OutboundConfig(**config_json['outbound'])
-        # if config.outbound_config.tls is True \
-        #         and config_json['tls_root_ca_path'] is not None:
-        #     config.outbound_config.tls_root_ca_path = config_json['outbound']['tls_root_ca_path']
+        if config.outbound_config.tls is True \
+                and 'tls_root_ca_path' in config_json['outbound']:
+            config.outbound_config.tls_root_ca_path = config_json['outbound']['tls_root_ca_path']
 
         print(f'use {filename} as config')
 

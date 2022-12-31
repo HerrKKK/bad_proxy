@@ -27,8 +27,12 @@ class Outbound:
         self.protocol = config.protocol
         self.tls = config.tls
         if self.tls is True:
-            self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            self.context.load_verify_locations('C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\test\\certificate.pem')
+            if hasattr(config, 'tls_root_ca_path') \
+                    and config.tls_root_ca_path is not None:
+                self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                self.context.load_verify_locations(config.tls_root_ca_path)
+            else:
+                self.context = ssl.create_default_context()
 
     def connect(self,
                 target_host: str,
@@ -52,7 +56,7 @@ class Outbound:
 
         if self.tls is True:
             self.socket = self.context.wrap_socket(self.unsafe_socket,
-                                                   server_hostname='wwr-blog.com')
+                                                   server_hostname=self.host)
 
         # whether to send the first package
         if payload is not None:

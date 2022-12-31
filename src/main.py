@@ -29,8 +29,8 @@ class StartUp:
 
         if config.inbound_config.tls is True:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            self.context.load_cert_chain('C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\test\\certificate.pem',
-                                         'C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\test\\key.pem')
+            self.context.load_cert_chain(config.inbound_config.tls_cert_path,
+                                         config.inbound_config.tls_key_path)
             self.socket_proxy = self.context.wrap_socket(self.socket_proxy_unsafe,
                                                          server_side=True)
 
