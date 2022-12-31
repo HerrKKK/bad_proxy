@@ -1,0 +1,14 @@
+{
+  "inbound": {
+    "host": "0.0.0.0",
+    "port": 9999,
+    "protocol": "btp",
+    "tls": true,
+    "tls_cert_path": "/etc/letsencrypt/live/wwr-blog.com/fullchain.pem",
+    "tls_key_path": "/etc/letsencrypt/live/wwr-blog.com/privkey.pem"
+  },
+  "outbound": {
+    "protocol": "freedom"
+  }
+}
+
