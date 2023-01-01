@@ -47,23 +47,8 @@ class Inbound:
         if hasattr(self, 'socket') and self.socket is not None:
             self.socket.close()
 
-    def send_fake_resp(self, msg: Optional[str] = '404 not found'):
-        content = msg.encode(encoding='utf-8')
-        first_line = b'HTTP/1.1 200 OK\r\n'
-        header = b'Content-Type: text/html\r\n' \
-                 + b'Content-length: ' \
-                 + str(len(content)).encode() + b'\r\n'
-        self.socket.send(first_line + header + content)
-        self.socket.close()
-
     def create_fake_connection(self):
-        HTTP.inbound_connect(self.socket)
-        is_recv = True
-        while is_recv:
-            data = self.socket.recv(8192)
-            if data == b'':
-                break
-        self.send_fake_resp()
+        HTTP.send_fake_response(self.socket)
 
     def recv(self):
         # decode request to next step, return raw data

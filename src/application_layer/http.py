@@ -36,6 +36,15 @@ class HttpRequestPacket(object):
 
 
 class HTTP:
+    redirect_header = b'HTTP/1.1 301 Moved Permanently\r\n' \
+                    + b'Cache-Control: no-store\r\n' \
+                    + b'Location: https://google.com/ \r\n\r\n'
+    response_body = '''
+        <html><body><h1>404 not found</h1>
+        <p>This route is deprecated, please visit https://wwr-blog.com/<p>
+        </body></html>
+    '''
+
     @staticmethod
     def inbound_connect(client_socket: socket,
                         buf_size: Optional[int] = 8192) -> (str, int):
@@ -72,3 +81,11 @@ class HTTP:
         if isinstance(server_port, bytes):
             server_port = int(server_port.decode())
         return server_host.decode(), server_port, req_data
+
+    @staticmethod
+    def send_fake_response(server_socket: socket):
+        headers = b'HTTP/1.1 200 OK\r\n' \
+                + b'Content-Type: text/html\r\n' \
+                + b'Content-Length: ' + str(len(HTTP.response_body)).encode() \
+                + b'Connection: close \r\n\r\n'
+        server_socket.send(headers + HTTP.response_body.encode())
