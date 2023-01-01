@@ -59,4 +59,7 @@ if __name__ == '__main__':
         sys.exit()
 
     app_config = read_config(config_filename)
+    print('listening on ',
+          app_config.inbound_config.host,
+          app_config.inbound_config.port)
     StartUp().start(app_config)

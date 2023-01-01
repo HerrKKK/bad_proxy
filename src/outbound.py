@@ -5,7 +5,6 @@ from ssl import SSLContext
 from typing import Optional
 
 from protocol import ProtocolType
-from net_utils import connect_socket
 from config import OutboundConfig
 from application_layer import BTP
 
@@ -16,8 +15,8 @@ class Outbound:
     protocol: ProtocolType
     uuid: str
     tls: bool
-    unsafe_socket: socket
-    socket: socket
+    unsafe_socket: socket = None
+    socket: socket = None
     context: SSLContext
     target_host: str
     target_port: int
@@ -37,21 +36,29 @@ class Outbound:
             else:
                 self.context = ssl.create_default_context()
 
+    def socket_connect(self):
+        # getaddrinfo -> [(family, socket_type, proto, canonname, target_addr),]
+        host, port = self.host, self.port
+        if self.protocol == ProtocolType.FREEDOM:
+            print(f'outbound connect to {self.target_host}: {self.target_port}')
+            host, port = self.target_host, self.target_port
+
+        (family, socket_type, _, _, target_addr) = socket.getaddrinfo(host, port)[0]
+
+        self.unsafe_socket = socket.socket(family, socket_type)
+        self.unsafe_socket.setblocking(False)
+        self.unsafe_socket.settimeout(5)
+        self.unsafe_socket.connect(target_addr)
+        self.socket = self.unsafe_socket
+
     def connect(self,
                 target_host: str,
                 target_port: int,
                 payload: Optional[bytes] = b''):
-        self.target_host = target_host  # domain or address
+        self.target_host = target_host  # hostname or address
         self.target_port = target_port
 
-        if self.protocol == ProtocolType.FREEDOM:
-            print(f'outbound connect to {self.target_host}: {self.target_port}')
-            self.unsafe_socket = connect_socket(target_host, target_port)
-        else:
-            print(f'outbound connect to {self.host}: {self.port}')
-            self.unsafe_socket = connect_socket(self.host, self.port)
-
-        self.socket = self.unsafe_socket
+        self.socket_connect()
 
         if self.tls is True:
             self.socket = self.context.wrap_socket(self.unsafe_socket,
@@ -71,5 +78,7 @@ class Outbound:
             self.socket.send(payload)
 
     def close(self):
-        if hasattr(self, 'socket') and self.socket is not None:
+        if self.socket is not None:
             self.socket.close()
+        if self.unsafe_socket is not None:
+            self.unsafe_socket.close()
