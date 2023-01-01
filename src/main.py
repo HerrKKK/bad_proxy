@@ -4,7 +4,7 @@ import socket
 import getopt
 import threading
 
-from bad_proxy import BadProxy
+from proxy import BadProxy
 from config import Config, read_config
 from ssl import SSLContext
 

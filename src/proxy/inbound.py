@@ -1,8 +1,7 @@
 import socket
 
-from protocols import ProtocolEnum
-from config import InboundConfig
-from protocols import HTTP, BTP
+from src.config import InboundConfig
+from src.protocols import ProtocolEnum, HTTP, BTP
 
 
 class Inbound:

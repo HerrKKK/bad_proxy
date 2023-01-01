@@ -1,9 +1,9 @@
 import select
 
-from inbound import Inbound
-from outbound import Outbound
-from config import Config
-from protocols import BTPException
+from src.config import Config
+from src.protocols import BTPException
+from .inbound import Inbound
+from .outbound import Outbound
 
 
 class BadProxy(object):
