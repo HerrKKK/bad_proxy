@@ -37,7 +37,7 @@ class StartUp:
         try:
             while True:
                 instance = BadProxy(config)
-                print('waiting for connection')
+                print('\nwaiting for connection\n')
                 instance.inbound.listen(self.socket_proxy)
                 thread = threading.Thread(target=instance.proxy)
                 thread.start()

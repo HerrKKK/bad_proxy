@@ -4,7 +4,7 @@ from typing import Optional
 
 from protocol import ProtocolType
 from config import InboundConfig
-from application_layer import HTTP, BTP
+from application_layer import HTTP, BTP, BTPException
 
 
 class Inbound:
@@ -28,17 +28,23 @@ class Inbound:
         获取已经与代理端建立连接的客户端套接字，如无则阻塞，直到可以获取一个建立连接套接字
         返回：socket_client 代理端与客户端之间建立的套接字
         """
-        self.socket, _ = socket_proxy.accept()
+        try:
+            self.socket, _ = socket_proxy.accept()
+        except Exception as e:
+            print('invalid socket', e)
 
     def connect(self):
-        print(f'inbound connect to {self.host}: {self.port}')
+        print(f'inbound bound to {self.host}: {self.port}')
         match self.protocol:
             case ProtocolType.HTTP:
                 return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)
             case ProtocolType.BTP:
-                return BTP.inbound_connect(self.socket,
-                                           self.uuid,
-                                           self.socket_recv_buf_size)
+                try:
+                    return BTP.inbound_connect(self.socket,
+                                               self.uuid,
+                                               self.socket_recv_buf_size)
+                except Exception as e:
+                    raise BTPException(e)
 
     def close(self):
         if hasattr(self, 'socket') and self.socket is not None:

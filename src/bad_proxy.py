@@ -3,6 +3,7 @@ import select
 from inbound import Inbound
 from outbound import Outbound
 from config import Config
+from application_layer import BTPException
 
 
 class BadProxy(object):
@@ -26,8 +27,8 @@ class BadProxy(object):
 
             self.outbound.connect(target_host, target_port, payload)
             self.async_listen()
-        except Exception as e:
-            print('create fake connection', e)
+        except BTPException as e:
+            print('invalid btp in connection', e)
             self.inbound.create_fake_connection()
         finally:
             self.inbound.close()

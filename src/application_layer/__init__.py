@@ -1,2 +1,2 @@
-from .btp import BTP, BTPRequest, BTPResponse
+from .btp import BTP, BTPRequest, BTPResponse, BTPException
 from .http import HTTP

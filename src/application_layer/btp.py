@@ -72,6 +72,10 @@ class BTPResponse:
         self.payload = data[base:]
 
 
+class BTPException(Exception):
+    pass
+
+
 class BTP:
     @staticmethod
     def inbound_connect(inbound_socket: socket,  # inbound socket
