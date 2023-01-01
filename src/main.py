@@ -34,16 +34,17 @@ class StartUp:
             self.socket_proxy = self.context.wrap_socket(self.socket_proxy_unsafe,
                                                          server_side=True)
 
-        try:
-            while True:
+        while True:
+            try:
                 instance = BadProxy(config)
                 print('\nwaiting for connection\n')
                 instance.inbound.listen(self.socket_proxy)
                 thread = threading.Thread(target=instance.proxy)
                 thread.start()
-        except Exception as e:
-            print(e)
-            sys.exit()
+            except KeyboardInterrupt:
+                sys.exit()
+            except Exception as e:
+                print(e)
 
 
 if __name__ == '__main__':
@@ -51,7 +52,6 @@ if __name__ == '__main__':
     try:
         opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])
         for opt, arg in opts:
-            print(opt, arg)
             if opt in ('-c', '--config'):
                 config_filename = arg
     except Exception as ex:

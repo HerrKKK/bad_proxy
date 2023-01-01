@@ -28,10 +28,7 @@ class Inbound:
         获取已经与代理端建立连接的客户端套接字，如无则阻塞，直到可以获取一个建立连接套接字
         返回：socket_client 代理端与客户端之间建立的套接字
         """
-        try:
-            self.socket, _ = socket_proxy.accept()
-        except Exception as e:
-            print('invalid socket', e)
+        self.socket, _ = socket_proxy.accept()
 
     def connect(self):
         print(f'inbound bound to {self.host}: {self.port}')
@@ -60,6 +57,7 @@ class Inbound:
         self.socket.close()
 
     def create_fake_connection(self):
+        HTTP.inbound_connect(self.socket)
         is_recv = True
         while is_recv:
             data = self.socket.recv(8192)
