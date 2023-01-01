@@ -2,7 +2,6 @@ import ssl
 import socket
 
 from ssl import SSLContext
-from typing import Optional
 
 from src.protocols import ProtocolEnum
 from src.config import OutboundConfig
@@ -54,7 +53,7 @@ class Outbound:
     def connect(self,
                 target_host: str,
                 target_port: int,
-                payload: Optional[bytes] = b''):
+                payload: bytes | None = b''):
         self.target_host = target_host  # hostname or address
         self.target_port = target_port
 

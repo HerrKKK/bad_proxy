@@ -3,7 +3,6 @@ import socket
 import secrets
 import time
 
-from typing import Optional
 from uuid import UUID
 from enum import IntEnum
 
@@ -100,7 +99,7 @@ class BTP:
     @staticmethod
     def inbound_connect(inbound_socket: socket,  # inbound socket
                         inbound_uuid: str,
-                        buf_size: Optional[int] = 8192) -> (str, int):
+                        buf_size: int | None = 8192) -> (str, int):
         req_data = inbound_socket.recv(buf_size)
         if req_data == b'':
             print('inbound connecting receiving none data')
@@ -132,7 +131,7 @@ class BTP:
                          target_host: str,  # tell server to connect target host
                          target_port: int,
                          outbound_uuid: str,
-                         buf_size: Optional[int] = 8192):
+                         buf_size: int | None = 8192):
         btp_request = BTP.encode_request(target_host,
                                          target_port,
                                          outbound_uuid,
@@ -146,10 +145,7 @@ class BTP:
                        port: int,
                        uuid_str: str,
                        direct: BTPDirective = BTPDirective.CONNECT,
-                       payload: Optional[bytes] = b''):
-        """
-        :return: BTP form request
-        """
+                       payload: bytes | None = b''):
         timestamp = (int(time.time()) + secret_generator.randint(0, 60) - 30)\
             .to_bytes(4, 'big')
 

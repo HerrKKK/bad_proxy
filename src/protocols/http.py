@@ -1,7 +1,5 @@
 import socket
 
-from typing import Optional
-
 
 class HttpRequestPacket(object):
     # HTTP请求包
@@ -47,7 +45,7 @@ class HTTP:
 
     @staticmethod
     def inbound_connect(client_socket: socket,
-                        buf_size: Optional[int] = 8192) -> (str, int):
+                        buf_size: int | None = 8192) -> (str, int):
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
             print('inbound received none data')

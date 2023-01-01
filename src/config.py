@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from protocols import ProtocolEnum
 
@@ -17,13 +16,13 @@ class InboundConfig(BoundConfig):
     tls_key_path: str
 
     def __init__(self,
-                 host: Optional[str] = None,
-                 port: Optional[int] = None,
-                 protocol: Optional[str] = None,
-                 uuid: Optional[str] = None,
-                 tls: Optional[bool] = False,
-                 tls_cert_path: Optional[str] = None,
-                 tls_key_path: Optional[str] = None):
+                 host: str | None = None,
+                 port: int | None = None,
+                 protocol: str | None = None,
+                 uuid: str | None = None,
+                 tls: bool | None = False,
+                 tls_cert_path: str | None = None,
+                 tls_key_path: str | None = None):
         self.host = host
         self.port = port
         self.protocol = ProtocolEnum.interpret_string(protocol)
@@ -38,12 +37,12 @@ class OutboundConfig(BoundConfig):
     tls_root_ca_path: str
 
     def __init__(self,
-                 host: Optional[str] = None,
-                 port: Optional[int] = None,
-                 protocol: Optional[str] = None,
-                 uuid: Optional[str] = None,
-                 tls: Optional[bool] = False,
-                 tls_root_ca_path: Optional[str] = None):
+                 host: str | None = None,
+                 port: int | None = None,
+                 protocol: str | None = None,
+                 uuid: str | None = None,
+                 tls: bool | None = False,
+                 tls_root_ca_path: str | None = None):
         self.host = host
         self.port = port
         self.protocol = ProtocolEnum.interpret_string(protocol)
@@ -58,7 +57,7 @@ class Config:
     outbound_config: OutboundConfig
 
 
-def read_config(filename: Optional[str] = 'conf/config.json'):
+def read_config(filename: str | None = 'conf/config.json'):
     if filename is None:
         filename = 'config.json'
 
