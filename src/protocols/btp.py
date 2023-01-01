@@ -97,9 +97,9 @@ class BTPException(Exception):
 
 class BTP:
     @staticmethod
-    def inbound_connect(inbound_socket: socket,  # inbound socket
+    def inbound_connect(inbound_socket: socket,
                         inbound_uuid: str,
-                        buf_size: int | None = 8192) -> (str, int):
+                        buf_size: int | None = 8192) -> (str, int, bytes):
         req_data = inbound_socket.recv(buf_size)
         if req_data == b'':
             print('inbound connecting receiving none data')
@@ -127,11 +127,11 @@ class BTP:
             req_data[8:]  # btp_request.payload
 
     @staticmethod
-    def outbound_connect(outbound_socket: socket,  # outbound socket
+    def outbound_connect(outbound_socket: socket,
                          target_host: str,  # tell server to connect target host
                          target_port: int,
                          outbound_uuid: str,
-                         buf_size: int | None = 8192):
+                         buf_size: int | None = 8192) -> bytes:  # return first package
         btp_request = BTP.encode_request(target_host,
                                          target_port,
                                          outbound_uuid,
@@ -145,7 +145,7 @@ class BTP:
                        port: int,
                        uuid_str: str,
                        direct: BTPDirective = BTPDirective.CONNECT,
-                       payload: bytes | None = b''):
+                       payload: bytes | None = b'') -> bytes:
         timestamp = (int(time.time()) + secret_generator.randint(0, 60) - 30)\
             .to_bytes(4, 'big')
 
@@ -171,7 +171,7 @@ class BTP:
         return digest + body
 
     @staticmethod
-    def encode_response(data):
+    def encode_response(data) -> bytes:
         """
         :param data: plain bytes
         :return: BTP form response

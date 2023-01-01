@@ -16,13 +16,13 @@ class Inbound:
         self.port = config.port
         self.protocol = config.protocol
         self.uuid = config.uuid
-        self.buff_size = 8 * 1024
+        self.buff_size = config.buf_size
 
     def listen(self, socket_proxy):
         # listen to any connection to the inbound and get its socket
         self.socket, _ = socket_proxy.accept()
 
-    def connect(self):
+    def connect(self) -> (str, int, bytes):
         match self.protocol:
             case ProtocolEnum.HTTP:
                 return HTTP.inbound_connect(self.socket,

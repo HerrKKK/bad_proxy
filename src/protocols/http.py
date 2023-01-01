@@ -45,7 +45,7 @@ class HTTP:
 
     @staticmethod
     def inbound_connect(client_socket: socket,
-                        buf_size: int | None = 8192) -> (str, int):
+                        buf_size: int | None = 8192) -> (str, int, bytes):
         req_data = client_socket.recv(buf_size)
         if req_data == b'':
             print('inbound received none data')

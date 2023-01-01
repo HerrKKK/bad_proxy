@@ -13,19 +13,21 @@ class Outbound:
     port: int
     protocol: ProtocolEnum
     uuid: str
+    buff_size: int
     tls: bool
     unsafe_socket: socket = None
     socket: socket = None
     context: SSLContext
     target_host: str
     target_port: int
-    buff_size = 8 * 1024
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
         self.port = config.port
         self.protocol = config.protocol
         self.uuid = config.uuid
+        self.buff_size = config.buf_size
+
         self.tls = config.tls
         if self.tls is True:
             if config.tls_root_ca_path is not None:

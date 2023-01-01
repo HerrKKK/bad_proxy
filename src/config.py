@@ -59,7 +59,7 @@ class Config:
         self.outbound_config = OutboundConfig(**outbound)
 
 
-def read_config(filename: str | None = 'conf/config.json'):
+def read_config(filename: str | None = 'conf/config.json') -> Config | None:
     with open(filename, 'r') as f:
         text = f.read()
         config_json = json.loads(text)
