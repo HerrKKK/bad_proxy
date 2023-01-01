@@ -21,6 +21,7 @@ class Outbound:
     context: SSLContext
     target_host: str
     target_port: int
+    socket_recv_buf_size = 8 * 1024
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
@@ -39,7 +40,7 @@ class Outbound:
     def connect(self,
                 target_host: str,
                 target_port: int,
-                payload: Optional[bytes] = None):
+                payload: Optional[bytes] = b''):
         self.target_host = target_host  # domain or address
         self.target_port = target_port
 
@@ -58,45 +59,17 @@ class Outbound:
 
         match self.protocol:
             case ProtocolType.BTP:
-                BTP.outbound_connect(self.socket,
-                                     target_host,
-                                     target_port,
-                                     self.uuid)
+                if payload is None:
+                    payload = ''
+                payload = BTP.outbound_connect(self.socket,
+                                               target_host,
+                                               target_port,
+                                               self.uuid) + payload
 
         # whether to send the first package from inbound
         if payload is not None:
-            self.send(payload)
+            self.socket.send(payload)
 
     def close(self):
         if hasattr(self, 'socket') and self.socket is not None:
             self.socket.close()
-
-    def recv(self):
-        # decode response to raw data
-        response_data = self.socket.recv(8 * 1024)
-        match self.protocol:
-            case ProtocolType.HTTP:
-                return response_data
-            case ProtocolType.BTP:
-                return response_data
-                # return BTPResponse(response_data).payload
-            case ProtocolType.FREEDOM:
-                # print('freedom data: ', response_data)
-                return response_data
-
-    def send(self, raw_data: bytes):
-        # encode request to outbound host/port
-        match self.protocol:
-            case ProtocolType.HTTP:
-                self.socket.send(raw_data)
-                return
-            case ProtocolType.BTP:
-                self.socket.send(raw_data)
-                # host not right! use those from http request!
-                # self.socket.send(BTP.encode_request(self.target_host,
-                #                                     self.target_port,
-                #                                     raw_data))
-                return
-            case ProtocolType.FREEDOM:
-                self.socket.send(raw_data)
-                return

@@ -110,10 +110,16 @@ class BTP:
         assert btp_request.uuid == inbound_uuid  # verify
         assert btp_request.directive == BTPDirective.CONNECT
 
-        inbound_socket.send(BTP.encode_response('connected'.encode(encoding='utf-8')))
+        btp_token = secrets.token_bytes(nbytes=8)
+        # the random token will be attached to the head of  the first package
+        inbound_socket.send(BTP.encode_response(btp_token))
         req_data = inbound_socket.recv(buf_size)  # listen immediately
 
-        return btp_request.host.encode(), btp_request.port, req_data  # btp_request.payload
+        print(f'btp_token is {req_data[:8]}')
+        assert req_data[:8] == btp_token
+        return btp_request.host.encode(),\
+            btp_request.port,\
+            req_data[8:]  # btp_request.payload
 
     @staticmethod
     def outbound_connect(outbound_socket: socket,  # outbound socket
@@ -126,10 +132,8 @@ class BTP:
                                          outbound_uuid,
                                          BTPDirective.CONNECT)
         outbound_socket.send(btp_request)
-        resp = outbound_socket.recv(buf_size)  # verify
-        if BTPResponse(resp).payload.decode(encoding='utf-8') != 'connected':
-            print(BTPResponse(resp).payload.decode(encoding='utf-8'))
-            raise Exception('invalid btp connection')
+        # return btp token, the challenge for protecting any replay
+        return BTPResponse(outbound_socket.recv(buf_size)).payload
 
     @staticmethod
     def encode_request(host: str,

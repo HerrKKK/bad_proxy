@@ -59,7 +59,6 @@ class BadProxy(object):
                             is_recv = False
                             continue
                         self.outbound.socket.send(data)  # 将客户端请求数据发往服务端
-                        # print('proxy', 'client -> server')
 
                     elif tmp_socket is self.outbound.socket:
                         if data == b'':

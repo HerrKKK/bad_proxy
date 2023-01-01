@@ -17,9 +17,7 @@ class Inbound:
         self.port = config.port
         self.protocol = config.protocol
         self.uuid = config.uuid
-
         self.socket_recv_buf_size = 8 * 1024
-        self.delay = 1/1000.0
 
     def listen(self, socket_proxy: socket):
         """
@@ -32,7 +30,8 @@ class Inbound:
         print(f'inbound bound to {self.host}: {self.port}')
         match self.protocol:
             case ProtocolType.HTTP:
-                return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)
+                return HTTP.inbound_connect(self.socket,
+                                            self.socket_recv_buf_size)
             case ProtocolType.BTP:
                 try:
                     return BTP.inbound_connect(self.socket,
@@ -47,23 +46,3 @@ class Inbound:
 
     def create_fake_connection(self):
         HTTP.send_fake_response(self.socket)
-
-    def recv(self):
-        # decode request to next step, return raw data
-        request_data = self.socket.recv(self.socket_recv_buf_size)
-        match self.protocol:
-            case ProtocolType.HTTP:
-                return request_data
-            case ProtocolType.BTP:
-                return request_data
-                # return BTPRequest(request_data).payload
-
-    def send(self, raw_data: bytes):
-        # encode response to send
-        match self.protocol:
-            case ProtocolType.HTTP:
-                self.socket.send(raw_data)
-                return
-            case ProtocolType.BTP:
-                return raw_data
-                # return self.socket.send(BTP.encode_response(raw_data))
