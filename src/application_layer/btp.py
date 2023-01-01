@@ -1,7 +1,10 @@
 import socket
+import secrets
 import uuid
 
 from typing import Optional
+
+secret_generator = secrets.SystemRandom()
 
 
 class BTPRequest:
@@ -105,8 +108,11 @@ class BTP:
         """
         :return: BTP form request
         """
-        confusion = bytes(29)
-        confusion_len = (29).to_bytes(1, 'big')
+        confusion_len = secret_generator.randint(11, 29)
+        confusion = secrets.token_bytes(nbytes=confusion_len)
+        assert len(confusion) == confusion_len
+
+        confusion_len = confusion_len.to_bytes(1, 'big')
         uid = uuid.uuid4().bytes
         # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
