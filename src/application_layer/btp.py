@@ -1,5 +1,6 @@
 import socket
 import secrets
+import hashlib
 import uuid
 
 from typing import Optional
@@ -9,6 +10,7 @@ secret_generator = secrets.SystemRandom()
 
 
 class BTPRequest:
+    md5: bytes
     confusion_len: int
     confusion_msg: bytes
     uuid: str
@@ -22,9 +24,14 @@ class BTPRequest:
         self.__parse(data)
 
     def __parse(self, data: bytes):
+        assert len(data) > 54
         base = 0
 
-        self.confusion_len = int.from_bytes(data[:1],
+        self.md5 = data[base: base + 16]
+        base += 16
+        assert self.md5 == hashlib.md5(data[base:]).digest()
+
+        self.confusion_len = int.from_bytes(data[base: base + 1],
                                             byteorder='big',
                                             signed=False)
         base += 1 + self.confusion_len
@@ -49,6 +56,11 @@ class BTPRequest:
                                    byteorder='big',
                                    signed=False)
         base += 2
+
+        print(f'all len is {len(data)},',
+              f'confusion len is {self.confusion_len},',
+              f'host len is {self.host_len}',
+              f'data len is {len(data) - base},')
 
         self.payload = data[base:]
 
@@ -116,11 +128,11 @@ class BTP:
     def encode_request(host: str,
                        port: int,
                        uuid_str: str,
-                       data: bytes):
+                       payload: Optional[bytes] = b''):
         """
         :return: BTP form request
         """
-        confusion_len = secret_generator.randint(7, 31)
+        confusion_len = secret_generator.randint(7, 32)
         confusion = secrets.token_bytes(nbytes=confusion_len)
 
         confusion_len = confusion_len.to_bytes(1, 'big')
@@ -132,14 +144,17 @@ class BTP:
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
 
-        return confusion_len \
+        body = confusion_len \
             + confusion \
             + uid \
             + directive \
             + host_len \
             + host_bytes \
             + port_bytes \
-            + data
+            + payload
+
+        md5 = hashlib.md5(body).digest()
+        return md5 + body
 
     @staticmethod
     def encode_response(data):
