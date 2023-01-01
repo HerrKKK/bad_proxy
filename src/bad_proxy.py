@@ -21,18 +21,19 @@ class BadProxy(object):
         """
         try:
             target_host, target_port, payload = self.inbound.connect()
+            if target_host is None or target_port is None:
+                return
+
+            self.outbound.connect(target_host, target_port, payload)
+            self.async_listen()
         except Exception as e:
             print('create fake connection', e)
             self.inbound.create_fake_connection()
-            return
+        finally:
+            self.inbound.close()
+            self.outbound.close()
 
-        if target_host is None or target_port is None:
-            return
-
-        self.outbound.connect(target_host, target_port, payload)
-        self.async_listen()
-
-        # 使用select异步处理，不阻塞
+    # 使用select异步处理，不阻塞
     def async_listen(self):
         """
         使用select实现异步处理数据
@@ -70,6 +71,3 @@ class BadProxy(object):
             except Exception as e:
                 print(e)
                 break
-
-        self.inbound.socket.close()
-        self.outbound.socket.close()

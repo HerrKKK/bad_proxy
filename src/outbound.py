@@ -67,6 +67,10 @@ class Outbound:
         if payload is not None:
             self.send(payload)
 
+    def close(self):
+        if hasattr(self, 'socket') and self.socket is not None:
+            self.socket.close()
+
     def recv(self):
         # decode response to raw data
         response_data = self.socket.recv(8 * 1024)

@@ -40,6 +40,10 @@ class Inbound:
                                            self.uuid,
                                            self.socket_recv_buf_size)
 
+    def close(self):
+        if hasattr(self, 'socket') and self.socket is not None:
+            self.socket.close()
+
     def send_fake_resp(self, msg: Optional[str] = '404 not found'):
         content = msg.encode(encoding='utf-8')
         first_line = b'HTTP/1.1 200 OK\r\n'
