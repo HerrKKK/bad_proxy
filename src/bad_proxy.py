@@ -19,10 +19,17 @@ class BadProxy(object):
         代理核心程序
         参数：socket_client 代理端与客户端之间建立的套接字
         """
-        server_host, server_port, payload = self.inbound.connect()
-        if server_host is None or server_port is None:
+        try:
+            target_host, target_port, payload = self.inbound.connect()
+        except Exception as e:
+            print('create fake connection', e)
+            self.inbound.create_fake_connection()
             return
-        self.outbound.connect(server_host, server_port, payload)
+
+        if target_host is None or target_port is None:
+            return
+
+        self.outbound.connect(target_host, target_port, payload)
         self.async_listen()
 
         # 使用select异步处理，不阻塞

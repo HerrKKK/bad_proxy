@@ -84,12 +84,12 @@ class BTP:
 
         btp_request = BTPRequest(req_data)
         assert btp_request.uuid == inbound_uuid  # verify
+        # prevent replay attack for connect message, both short time and long time
+        assert btp_request.payload.decode(encoding='utf-8') == 'connect'
 
-        req_data = None
-        if btp_request.payload.decode(encoding='utf-8') == 'connect':
-            inbound_socket.send(BTP.encode_response('connected'
-                                                    .encode(encoding='utf-8')))
-            req_data = inbound_socket.recv(buf_size)  # listen immediately
+        inbound_socket.send(BTP.encode_response('connected'.encode(encoding='utf-8')))
+        req_data = inbound_socket.recv(buf_size)  # listen immediately
+
         return btp_request.host.encode(), btp_request.port, req_data  # btp_request.payload
 
     @staticmethod
@@ -143,6 +143,7 @@ class BTP:
         :param data: plain bytes
         :return: BTP form response
         """
-        confusion = bytes(29)
-        confusion_len = (29).to_bytes(1, 'big')
+        confusion_len = secret_generator.randint(7, 31)
+        confusion = secrets.token_bytes(nbytes=confusion_len)
+        confusion_len = confusion_len.to_bytes(1, 'big')
         return confusion_len + confusion + data

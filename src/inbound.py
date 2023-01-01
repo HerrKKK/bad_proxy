@@ -1,5 +1,7 @@
 import socket
 
+from typing import Optional
+
 from protocol import ProtocolType
 from config import InboundConfig
 from application_layer import HTTP, BTP
@@ -37,6 +39,23 @@ class Inbound:
                 return BTP.inbound_connect(self.socket,
                                            self.uuid,
                                            self.socket_recv_buf_size)
+
+    def send_fake_resp(self, msg: Optional[str] = '404 not found'):
+        content = msg.encode(encoding='utf-8')
+        first_line = b'HTTP/1.1 200 OK\r\n'
+        header = b'Content-Type: text/html\r\n' \
+                 + b'Content-length: ' \
+                 + str(len(content)).encode() + b'\r\n'
+        self.socket.send(first_line + header + content)
+        self.socket.close()
+
+    def create_fake_connection(self):
+        is_recv = True
+        while is_recv:
+            data = self.socket.recv(8192)
+            if data == b'':
+                break
+        self.send_fake_resp()
 
     def recv(self):
         # decode request to next step, return raw data
