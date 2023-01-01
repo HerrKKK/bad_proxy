@@ -5,6 +5,7 @@ import uuid
 
 from typing import Optional
 from uuid import UUID
+from enum import IntEnum
 
 secret_generator = secrets.SystemRandom()
 
@@ -39,7 +40,7 @@ class BTPRequest:
         self.uuid = uuid.UUID(bytes=data[base: base + 16]).hex
         base += 16
 
-        self.directive = int.from_bytes(data[base: base + 16],
+        self.directive = int.from_bytes(data[base: base + 1],
                                         byteorder='big',
                                         signed=False)
         base += 1
@@ -84,6 +85,12 @@ class BTPResponse:
         self.payload = data[base:]
 
 
+class BTPDirective(IntEnum):
+    NONE = 0
+    CONNECT = 1
+    pass
+
+
 class BTPException(Exception):
     pass
 
@@ -99,9 +106,9 @@ class BTP:
             return None, None, None
 
         btp_request = BTPRequest(req_data)
+
         assert btp_request.uuid == inbound_uuid  # verify
-        # prevent replay attack for connect message, both short time and long time
-        assert btp_request.payload.decode(encoding='utf-8') == 'connect'
+        assert btp_request.directive == BTPDirective.CONNECT
 
         inbound_socket.send(BTP.encode_response('connected'.encode(encoding='utf-8')))
         req_data = inbound_socket.recv(buf_size)  # listen immediately
@@ -117,7 +124,7 @@ class BTP:
         btp_request = BTP.encode_request(target_host,
                                          target_port,
                                          outbound_uuid,
-                                         'connect'.encode(encoding='utf-8'))
+                                         BTPDirective.CONNECT)
         outbound_socket.send(btp_request)
         resp = outbound_socket.recv(buf_size)  # verify
         if BTPResponse(resp).payload.decode(encoding='utf-8') != 'connected':
@@ -128,6 +135,7 @@ class BTP:
     def encode_request(host: str,
                        port: int,
                        uuid_str: str,
+                       direct: BTPDirective = BTPDirective.CONNECT,
                        payload: Optional[bytes] = b''):
         """
         :return: BTP form request
@@ -139,7 +147,7 @@ class BTP:
         uid = UUID(uuid_str).bytes
         # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
-        directive = (0).to_bytes(1, 'big')
+        directive = int(direct).to_bytes(1, 'big')
         host_bytes = host.encode(encoding='utf-8')
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
