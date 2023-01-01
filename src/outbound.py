@@ -6,7 +6,7 @@ from typing import Optional
 
 from protocol import ProtocolType
 from config import OutboundConfig
-from application_layer import BTP
+from protocols import BTP
 
 
 class Outbound:

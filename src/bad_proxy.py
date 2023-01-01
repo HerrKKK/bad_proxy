@@ -3,7 +3,7 @@ import select
 from inbound import Inbound
 from outbound import Outbound
 from config import Config
-from application_layer import BTPException
+from protocols import BTPException
 
 
 class BadProxy(object):

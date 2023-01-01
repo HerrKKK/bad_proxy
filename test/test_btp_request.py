@@ -1,5 +1,5 @@
 import uuid
-from src.application_layer import BTP, BTPRequest
+from src.protocols import BTP, BTPRequest
 
 
 def test_btp_request(host: str,

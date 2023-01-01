@@ -1,4 +1,4 @@
-from src.application_layer import BTP, BTPResponse
+from src.protocols import BTP, BTPResponse
 
 
 def test_btp_response(data: str):

@@ -2,7 +2,7 @@ import socket
 
 from protocol import ProtocolType
 from config import InboundConfig
-from application_layer import HTTP, BTP
+from protocols import HTTP, BTP
 
 
 class Inbound:
