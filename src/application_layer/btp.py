@@ -1,7 +1,7 @@
+import hmac
 import socket
 import secrets
-import hashlib
-import uuid
+import time
 
 from typing import Optional
 from uuid import UUID
@@ -11,34 +11,37 @@ secret_generator = secrets.SystemRandom()
 
 
 class BTPRequest:
-    md5: bytes
-    confusion_len: int
-    confusion_msg: bytes
-    uuid: str
-    directive: int
-    host_len: int
-    host: str
-    port: int
-    payload: bytes
+    body: bytes
+    digest: bytes         # 32 Bytes
+    timestamp: int        # 4 Bytes
+    confusion_len: int    # 1 Byte
+    confusion_msg: bytes  # [0, 48] Bytes
+    directive: int        # 1 Bytes
+    host_len: int         # 1 Byte
+    host: str             # [1, 254) Bytes
+    port: int             # 2 Bytes
+    payload: bytes        # fixed length is 41
 
     def __init__(self, data):
         self.__parse(data)
 
     def __parse(self, data: bytes):
-        assert len(data) > 54
         base = 0
 
-        self.md5 = data[base: base + 16]
-        base += 16
-        assert self.md5 == hashlib.md5(data[base:]).digest()
+        self.digest = data[base: base + 32]
+        base += 32
+        self.body = data[base:]
+
+        self.timestamp = int.from_bytes(data[base: base + 4],
+                                        byteorder='big',
+                                        signed=False)
+        assert abs(int(time.time()) - self.timestamp) < 180
+        base += 4
 
         self.confusion_len = int.from_bytes(data[base: base + 1],
                                             byteorder='big',
                                             signed=False)
         base += 1 + self.confusion_len
-
-        self.uuid = uuid.UUID(bytes=data[base: base + 16]).hex
-        base += 16
 
         self.directive = int.from_bytes(data[base: base + 1],
                                         byteorder='big',
@@ -58,11 +61,7 @@ class BTPRequest:
                                    signed=False)
         base += 2
 
-        print(f'all len is {len(data)},',
-              f'confusion len is {self.confusion_len},',
-              f'host len is {self.host_len}',
-              f'data len is {len(data) - base},')
-
+        assert base - self.confusion_len - self.host_len == 41
         self.payload = data[base:]
 
 
@@ -107,7 +106,9 @@ class BTP:
 
         btp_request = BTPRequest(req_data)
 
-        assert btp_request.uuid == inbound_uuid  # verify
+        assert btp_request.digest == hmac.new(UUID(inbound_uuid).bytes,
+                                              btp_request.body,
+                                              'sha256').digest()
         assert btp_request.directive == BTPDirective.CONNECT
 
         btp_token = secrets.token_bytes(nbytes=8)
@@ -115,7 +116,6 @@ class BTP:
         inbound_socket.send(BTP.encode_response(btp_token))
         req_data = inbound_socket.recv(buf_size)  # listen immediately
 
-        print(f'btp_token is {req_data[:8]}')
         assert req_data[:8] == btp_token
         return btp_request.host.encode(),\
             btp_request.port,\
@@ -144,29 +144,29 @@ class BTP:
         """
         :return: BTP form request
         """
+        timestamp = (int(time.time()) + secret_generator.randint(0, 60) - 30)\
+            .to_bytes(4, 'big')
+
         confusion_len = secret_generator.randint(7, 32)
         confusion = secrets.token_bytes(nbytes=confusion_len)
-
         confusion_len = confusion_len.to_bytes(1, 'big')
-        uid = UUID(uuid_str).bytes
-        # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
-        #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
+
         directive = int(direct).to_bytes(1, 'big')
         host_bytes = host.encode(encoding='utf-8')
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
 
-        body = confusion_len \
+        body = timestamp \
+            + confusion_len \
             + confusion \
-            + uid \
             + directive \
             + host_len \
             + host_bytes \
             + port_bytes \
             + payload
 
-        md5 = hashlib.md5(body).digest()
-        return md5 + body
+        digest = hmac.new(UUID(uuid_str).bytes, body, 'sha256').digest()
+        return digest + body
 
     @staticmethod
     def encode_response(data):
@@ -174,7 +174,7 @@ class BTP:
         :param data: plain bytes
         :return: BTP form response
         """
-        confusion_len = secret_generator.randint(7, 31)
+        confusion_len = secret_generator.randint(32, 64)
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
         return confusion_len + confusion + data
