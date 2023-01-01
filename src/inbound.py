@@ -9,12 +9,14 @@ class Inbound:
     host: str
     port: int
     protocol: ProtocolType
+    uuid: str
     socket: socket
 
     def __init__(self, config: InboundConfig):
         self.host = config.host
         self.port = config.port
         self.protocol = config.protocol
+        self.uuid = config.uuid
 
         self.socket_recv_buf_size = 8 * 1024
         self.delay = 1/1000.0
@@ -32,7 +34,9 @@ class Inbound:
             case ProtocolType.HTTP:
                 return HTTP.inbound_connect(self.socket, self.socket_recv_buf_size)
             case ProtocolType.BTP:
-                return BTP.inbound_connect(self.socket, self.socket_recv_buf_size)
+                return BTP.inbound_connect(self.socket,
+                                           self.uuid,
+                                           self.socket_recv_buf_size)
 
     def recv(self):
         # decode request to next step, return raw data

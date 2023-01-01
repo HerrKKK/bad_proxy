@@ -1,9 +1,9 @@
 class ProtocolType:
-    RAW = 0
-    HTTP = 1
-    BTP = 2
-    FREEDOM = 3
-    BLACKHOLE = 4
+    RAW = 0        # inbound
+    HTTP = 1       # inbound
+    BTP = 2        # inbound/outbound
+    FREEDOM = 3    # outbound
+    BLACKHOLE = 4  # outbound
 
     @staticmethod
     def interpret_string(protocol_str: str):

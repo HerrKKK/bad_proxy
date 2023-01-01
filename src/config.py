@@ -8,6 +8,7 @@ class BoundConfig:
     host: str
     port: int
     protocol: ProtocolType
+    uuid: str
     tls: bool
 
 
@@ -19,12 +20,15 @@ class InboundConfig(BoundConfig):
                  host: Optional[str] = None,
                  port: Optional[int] = None,
                  protocol: Optional[str] = None,
+                 uuid: Optional[str] = None,
                  tls: Optional[bool] = False,
                  tls_cert_path: Optional[str] = None,
                  tls_key_path: Optional[str] = None):
         self.host = host
         self.port = port
         self.protocol = ProtocolType.interpret_string(protocol)
+        self.uuid = uuid.replace('-', '').replace(' ', '')\
+            if uuid is not None else None
         self.tls = tls
         self.tls_cert_path = tls_cert_path
         self.tls_key_path = tls_key_path
@@ -37,11 +41,14 @@ class OutboundConfig(BoundConfig):
                  host: Optional[str] = None,
                  port: Optional[int] = None,
                  protocol: Optional[str] = None,
+                 uuid: Optional[str] = None,
                  tls: Optional[bool] = False,
                  tls_root_ca_path: Optional[str] = None):
         self.host = host
         self.port = port
         self.protocol = ProtocolType.interpret_string(protocol)
+        self.uuid = uuid.replace('-', '').replace(' ', '') \
+            if uuid is not None else None
         self.tls = tls
         self.tls_root_ca_path = tls_root_ca_path
 

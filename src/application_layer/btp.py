@@ -3,6 +3,7 @@ import secrets
 import uuid
 
 from typing import Optional
+from uuid import UUID
 
 secret_generator = secrets.SystemRandom()
 
@@ -73,47 +74,53 @@ class BTPResponse:
 
 class BTP:
     @staticmethod
-    def inbound_connect(client_socket: socket,  # inbound socket
+    def inbound_connect(inbound_socket: socket,  # inbound socket
+                        inbound_uuid: str,
                         buf_size: Optional[int] = 8192) -> (str, int):
-        req_data = client_socket.recv(buf_size)
+        req_data = inbound_socket.recv(buf_size)
         if req_data == b'':
             print('inbound connecting receiving none data')
             return None, None, None
 
         btp_request = BTPRequest(req_data)
+        assert btp_request.uuid == inbound_uuid  # verify
+
         req_data = None
         if btp_request.payload.decode(encoding='utf-8') == 'connect':
-            client_socket.send(BTP.encode_response('connected'
-                                                   .encode(encoding='utf-8')))
-            req_data = client_socket.recv(buf_size)  # listen immediately
+            inbound_socket.send(BTP.encode_response('connected'
+                                                    .encode(encoding='utf-8')))
+            req_data = inbound_socket.recv(buf_size)  # listen immediately
         return btp_request.host.encode(), btp_request.port, req_data  # btp_request.payload
 
     @staticmethod
-    def outbound_connect(server_socket: socket,  # outbound socket
+    def outbound_connect(outbound_socket: socket,  # outbound socket
                          target_host: str,  # tell server to connect target host
                          target_port: int,
+                         outbound_uuid: str,
                          buf_size: Optional[int] = 8192):
         btp_request = BTP.encode_request(target_host,
                                          target_port,
+                                         outbound_uuid,
                                          'connect'.encode(encoding='utf-8'))
-        server_socket.send(btp_request)
-        resp = server_socket.recv(buf_size)  # verify
+        outbound_socket.send(btp_request)
+        resp = outbound_socket.recv(buf_size)  # verify
         if BTPResponse(resp).payload.decode(encoding='utf-8') != 'connected':
+            print(BTPResponse(resp).payload.decode(encoding='utf-8'))
             raise Exception('invalid btp connection')
 
     @staticmethod
     def encode_request(host: str,
                        port: int,
+                       uuid_str: str,
                        data: bytes):
         """
         :return: BTP form request
         """
-        confusion_len = secret_generator.randint(11, 29)
+        confusion_len = secret_generator.randint(7, 31)
         confusion = secrets.token_bytes(nbytes=confusion_len)
-        assert len(confusion) == confusion_len
 
         confusion_len = confusion_len.to_bytes(1, 'big')
-        uid = uuid.uuid4().bytes
+        uid = UUID(uuid_str).bytes
         # uuid = '01 6b 77 45 56 59 85 44-9f 80 f4 28 f7 d6 01 29'\
         #     .replace('-', '').replace(' ', '').encode(encoding='utf-8')
         directive = (0).to_bytes(1, 'big')

@@ -42,7 +42,7 @@ class StartUp:
                 thread = threading.Thread(target=instance.proxy)
                 thread.start()
         except Exception as e:
-            print(e.__str__)
+            print(e)
             sys.exit()
 
 

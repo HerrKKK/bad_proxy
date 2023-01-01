@@ -8,6 +8,7 @@
     "host": "localhost",
     "port": 9999,
     "protocol": "btp",
+    "uuid": "62d7a00c-965b-42fc-81a1-e020e7c21f94",
     "tls": true,
     "tls_root_ca_path": "C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\certs\\localhost_certificate.pem"
   }

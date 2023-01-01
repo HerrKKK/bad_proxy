@@ -14,6 +14,7 @@ class Outbound:
     host: str
     port: int
     protocol: ProtocolType
+    uuid: str
     tls: bool
     unsafe_socket: socket
     socket: socket
@@ -25,6 +26,7 @@ class Outbound:
         self.host = config.host
         self.port = config.port
         self.protocol = config.protocol
+        self.uuid = config.uuid
         self.tls = config.tls
         if self.tls is True:
             if hasattr(config, 'tls_root_ca_path') \
@@ -56,7 +58,10 @@ class Outbound:
 
         match self.protocol:
             case ProtocolType.BTP:
-                BTP.outbound_connect(self.socket, target_host, target_port)
+                BTP.outbound_connect(self.socket,
+                                     target_host,
+                                     target_port,
+                                     self.uuid)
 
         # whether to send the first package from inbound
         if payload is not None:
