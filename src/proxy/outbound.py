@@ -19,7 +19,7 @@ class Outbound:
     context: SSLContext
     target_host: str
     target_port: int
-    socket_recv_buf_size = 8 * 1024
+    buff_size = 8 * 1024
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
@@ -28,8 +28,7 @@ class Outbound:
         self.uuid = config.uuid
         self.tls = config.tls
         if self.tls is True:
-            if hasattr(config, 'tls_root_ca_path') \
-                    and config.tls_root_ca_path is not None:
+            if config.tls_root_ca_path is not None:
                 self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 self.context.load_verify_locations(config.tls_root_ca_path)
             else:
@@ -70,7 +69,8 @@ class Outbound:
                 payload = BTP.outbound_connect(self.socket,
                                                target_host,
                                                target_port,
-                                               self.uuid) + payload
+                                               self.uuid,
+                                               self.buff_size) + payload
 
         # whether to send the first package from inbound
         if payload is not None:

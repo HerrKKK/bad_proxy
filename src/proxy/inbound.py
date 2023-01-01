@@ -16,7 +16,7 @@ class Inbound:
         self.port = config.port
         self.protocol = config.protocol
         self.uuid = config.uuid
-        self.socket_recv_buf_size = 8 * 1024
+        self.buff_size = 8 * 1024
 
     def listen(self, socket_proxy):
         # listen to any connection to the inbound and get its socket
@@ -26,11 +26,11 @@ class Inbound:
         match self.protocol:
             case ProtocolEnum.HTTP:
                 return HTTP.inbound_connect(self.socket,
-                                            self.socket_recv_buf_size)
+                                            self.buff_size)
             case ProtocolEnum.BTP:
                 return BTP.inbound_connect(self.socket,
                                            self.uuid,
-                                           self.socket_recv_buf_size)
+                                           self.buff_size)
 
     def close(self):
         if self.socket is not None:

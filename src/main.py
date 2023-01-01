@@ -10,7 +10,7 @@ from ssl import SSLContext
 
 
 class StartUp:
-    socket_proxy: socket
+    socket_proxy: socket = None
     socket_proxy_unsafe: socket
     context: SSLContext
 

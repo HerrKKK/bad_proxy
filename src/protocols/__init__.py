@@ -23,4 +23,5 @@ class ProtocolEnum:
             case 'blackhole':
                 return ProtocolEnum.BLACKHOLE
             case _:
-                raise Exception('NO MATCH PROTOCOL!')
+                print('no matched protocol')
+                return None
