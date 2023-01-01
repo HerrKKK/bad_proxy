@@ -5,6 +5,8 @@
     "protocol": "http"
   },
   "outbound": {
-    "protocol": "freedom"
+    "host": "google.com",
+    "port": 443,
+    "protocol": "http"
   }
 }

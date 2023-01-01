@@ -32,9 +32,19 @@ class Inbound:
                                            self.uuid,
                                            self.buff_size)
 
-    def close(self):
-        if self.socket is not None:
-            self.socket.close()
+    def fallback(self, raw_data: bytes):
+        """
+        Warning:
+        This is invoked as active detection detected!
+        The function discard the inbound,
+        the protocol will be changed to HTTP
+        """
+        self.protocol = ProtocolEnum.HTTP
+        HTTP.handle_http_raw_data(self.socket, raw_data)
 
     def create_fake_connection(self):
         HTTP.send_fake_response(self.socket)
+
+    def close(self):
+        if self.socket is not None:
+            self.socket.close()

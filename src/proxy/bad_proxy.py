@@ -21,10 +21,15 @@ class BadProxy(object):
             self.outbound.connect(target_host, target_port, payload)
             self.async_listen()
         except BTPException as e:
-            print('invalid btp in connection', e)
-            self.inbound.create_fake_connection()
+            print('invalid btp in connection: ', e)
+            # self.outbound.fallback()
+            # self.inbound.fallback(e.raw_data)
+            # # send first package to specified host
+            # self.outbound.connect()
+            # self.async_listen()
+            # self.inbound.create_fake_connection()
         except Exception as e:
-            print(e)
+            print('fatal error: ', e)
         finally:
             self.inbound.close()
             self.outbound.close()

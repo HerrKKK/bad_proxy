@@ -1,36 +1,37 @@
 import socket
 
 
-class HttpRequestPacket(object):
-    # HTTP请求包
-    def __init__(self, data):
+class HttpRequest:
+    method: bytes = None
+    version: bytes = None
+    req_uri: bytes = None
+    headers: dict = {}
+
+    def __init__(self, data: bytes):
         self.__parse(data)
 
-    def __parse(self, data):
+    def __parse(self, data: bytes):
         """
-        解析一个HTTP请求数据包
-        GET https://test.wengcx.top/index.html
-        HTTP/1.1\r\nHost: test.wwr-blog.top\r\nProxy-Connection: keep-alive\r\nCache-Control: max-age=0\r\n\r\n
-
-        参数：data 原始数据
+        GET https://test.com HTTP/1.1\r\n
+        Host: test.test.com\r\n
+        Content-Type: text/html\r\n
+        Cache-Control: max-age=0\r\n\r\n
         """
-        i0 = data.find(b'\r\n')  # 请求行与请求头的分隔位置
-        i1 = data.find(b'\r\n\r\n')  # 请求头与请求数据的分隔位置
+        req_line_end = data.find(b'\r\n')  # end of the request line
+        header_end = data.find(b'\r\n\r\n')  # end of the header
 
-        # 请求行 Request-Line
-        self.req_line = data[:i0]
-        self.method, self.req_uri, self.version = self.req_line.split()  # 请求行由method、request uri、version组成
+        # Request-Line
+        self.req_line = data[:req_line_end]
+        # method request_uri version in request line
+        self.method, self.req_uri, self.version = self.req_line.split()
 
-        # 请求头域 Request Header Fields
-        self.req_header = data[i0+2:i1]
-        self.headers = {}
-        for header in self.req_header.split(b'\r\n'):
+        # Request Header Fields
+        headers = data[req_line_end + 2: header_end]
+        for header in headers.split(b'\r\n'):
             k, v = header.split(b': ')
             self.headers[k] = v
         self.host = self.headers.get(b'Host')
-
-        # 请求数据
-        self.req_data = data[i1+4:]
+        self.req_data = data[header_end + 4:]
 
 
 class HTTP:
@@ -51,33 +52,33 @@ class HTTP:
             print('inbound received none data')
             return None, None, None
 
-        # 解析http请求数据
-        http_packet = HttpRequestPacket(req_data)
+        # parse http request
+        http_packet = HttpRequest(req_data)
 
-        # 修正http请求数据
-        tmp = b'%s//%s' % (http_packet.req_uri.split(b'//')[0], http_packet.host)
-        req_data = req_data.replace(tmp, b'')
+        # remove domain of proxy itself in payload
+        proxy_domain = b'%s//%s' % (http_packet.req_uri.split(b'//')[0],
+                                    http_packet.host)
+        req_data = req_data.replace(proxy_domain, b'')
 
         # HTTP
         if http_packet.method in [b'GET', b'POST', b'PUT', b'DELETE', b'HEAD']:
             pass
-        # HTTPS，会先通过CONNECT方法建立TCP连接
+        # HTTPS use connect to build TCP connection
         if http_packet.method == b'CONNECT':
+            # HTTP/1.1 200 Connection Established\r\nConnection: Close\r\n\r\n
             success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \
                           % (http_packet.version, 200)
-            client_socket.send(success_msg)  # 完成连接，通知客户端
+            client_socket.send(success_msg)  # connection built
             req_data = client_socket.recv(buf_size)
-            # 客户端得知连接建立，会将真实请求数据发送给代理服务端
+            # client will send tls data after recv success message
 
-        # 获取服务端host、port
-        if b':' in http_packet.host:
-            server_host, server_port = http_packet.host.split(b':')
-        else:
-            server_host, server_port = http_packet.host, 80
+        # get target host and port
+        target_host, target_port = http_packet.host.split(b':')\
+            if b':' in http_packet.host else (http_packet.host, 80)
 
-        if isinstance(server_port, bytes):
-            server_port = int(server_port.decode())
-        return server_host.decode(), server_port, req_data
+        if isinstance(target_port, bytes):
+            target_port = int(target_port.decode())
+        return target_host.decode(), target_port, req_data
 
     @staticmethod
     def send_fake_response(server_socket: socket):

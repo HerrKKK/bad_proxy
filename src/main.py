@@ -48,7 +48,7 @@ class StartUp:
 
 
 if __name__ == '__main__':
-    config_filename = None
+    config_filename = 'conf/config.json'
     try:
         opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])
         for opt, arg in opts:

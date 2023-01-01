@@ -52,9 +52,15 @@ class Outbound:
         self.socket = self.unsafe_socket
 
     def connect(self,
-                target_host: str,
-                target_port: int,
+                target_host: str | None = None,
+                target_port: int | None = None,
                 payload: bytes | None = b''):
+        """
+        :param target_host: The destination of the request
+        :param target_port: The port of the request
+        :param payload: The payload of the first package of request
+        :return: NO RETURN
+        """
         self.target_host = target_host  # hostname or address
         self.target_port = target_port
 
@@ -66,6 +72,7 @@ class Outbound:
 
         match self.protocol:
             case ProtocolEnum.BTP:
+                assert target_host is not None and target_port is not None
                 if payload is None:
                     payload = ''
                 payload = BTP.outbound_connect(self.socket,
@@ -77,6 +84,18 @@ class Outbound:
         # whether to send the first package from inbound
         if payload is not None:
             self.socket.send(payload)
+
+    def fallback(self):
+        """
+        Warning:
+        This is invoked as active detection detected!
+        The function discard the outbound,
+        connect it to a preset host:port,
+        the protocol will be changed to HTTP/RAW
+        """
+        self.host = 'google.com'
+        self.port = 443
+        self.protocol = ProtocolEnum.HTTP
 
     def close(self):
         if self.socket is not None:
