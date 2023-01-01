@@ -33,12 +33,9 @@ class Inbound:
                 return HTTP.inbound_connect(self.socket,
                                             self.socket_recv_buf_size)
             case ProtocolType.BTP:
-                try:
-                    return BTP.inbound_connect(self.socket,
-                                               self.uuid,
-                                               self.socket_recv_buf_size)
-                except Exception as e:
-                    raise BTPException(e)
+                return BTP.inbound_connect(self.socket,
+                                           self.uuid,
+                                           self.socket_recv_buf_size)
 
     def close(self):
         if hasattr(self, 'socket') and self.socket is not None:

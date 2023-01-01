@@ -35,7 +35,8 @@ class BTPRequest:
         self.timestamp = int.from_bytes(data[base: base + 4],
                                         byteorder='big',
                                         signed=False)
-        assert abs(int(time.time()) - self.timestamp) < 180
+        if abs(int(time.time()) - self.timestamp) > 180:
+            raise BTPException('timeout')
         base += 4
 
         self.confusion_len = int.from_bytes(data[base: base + 1],
@@ -61,7 +62,8 @@ class BTPRequest:
                                    signed=False)
         base += 2
 
-        assert base - self.confusion_len - self.host_len == 41
+        if base - self.confusion_len - self.host_len != 41:
+            raise BTPException('wrong btp request length')
         self.payload = data[base:]
 
 
@@ -87,11 +89,11 @@ class BTPResponse:
 class BTPDirective(IntEnum):
     NONE = 0
     CONNECT = 1
-    pass
 
 
 class BTPException(Exception):
-    pass
+    def __init__(self, msg: str):
+        super(msg)
 
 
 class BTP:
@@ -106,17 +108,21 @@ class BTP:
 
         btp_request = BTPRequest(req_data)
 
-        assert btp_request.digest == hmac.new(UUID(inbound_uuid).bytes,
-                                              btp_request.body,
-                                              'sha256').digest()
-        assert btp_request.directive == BTPDirective.CONNECT
+        if btp_request.digest != hmac.new(UUID(inbound_uuid).bytes,
+                                          btp_request.body,
+                                          'sha256').digest():
+            raise BTPException('btp auth failure')
+        if btp_request.directive != BTPDirective.CONNECT:
+            raise BTPException('wrong directive')
 
         btp_token = secrets.token_bytes(nbytes=8)
         # the random token will be attached to the head of  the first package
         inbound_socket.send(BTP.encode_response(btp_token))
         req_data = inbound_socket.recv(buf_size)  # listen immediately
 
-        assert req_data[:8] == btp_token
+        if req_data[:8] != btp_token:
+            raise BTPException('btp challenge failure')
+
         return btp_request.host.encode(),\
             btp_request.port,\
             req_data[8:]  # btp_request.payload
