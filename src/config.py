@@ -1,13 +1,13 @@
 import json
 from typing import Optional
 
-from protocol import ProtocolType
+from protocols import ProtocolEnum
 
 
 class BoundConfig:
     host: str
     port: int
-    protocol: ProtocolType
+    protocol: ProtocolEnum
     uuid: str
     tls: bool
 
@@ -26,7 +26,7 @@ class InboundConfig(BoundConfig):
                  tls_key_path: Optional[str] = None):
         self.host = host
         self.port = port
-        self.protocol = ProtocolType.interpret_string(protocol)
+        self.protocol = ProtocolEnum.interpret_string(protocol)
         self.uuid = uuid.replace('-', '').replace(' ', '')\
             if uuid is not None else None
         self.tls = tls
@@ -46,7 +46,7 @@ class OutboundConfig(BoundConfig):
                  tls_root_ca_path: Optional[str] = None):
         self.host = host
         self.port = port
-        self.protocol = ProtocolType.interpret_string(protocol)
+        self.protocol = ProtocolEnum.interpret_string(protocol)
         self.uuid = uuid.replace('-', '').replace(' ', '') \
             if uuid is not None else None
         self.tls = tls

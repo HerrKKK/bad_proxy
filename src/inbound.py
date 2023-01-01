@@ -1,6 +1,6 @@
 import socket
 
-from protocol import ProtocolType
+from protocols import ProtocolEnum
 from config import InboundConfig
 from protocols import HTTP, BTP
 
@@ -8,7 +8,7 @@ from protocols import HTTP, BTP
 class Inbound:
     host: str
     port: int
-    protocol: ProtocolType
+    protocol: ProtocolEnum
     uuid: str
     socket: socket = None
 
@@ -25,10 +25,10 @@ class Inbound:
 
     def connect(self):
         match self.protocol:
-            case ProtocolType.HTTP:
+            case ProtocolEnum.HTTP:
                 return HTTP.inbound_connect(self.socket,
                                             self.socket_recv_buf_size)
-            case ProtocolType.BTP:
+            case ProtocolEnum.BTP:
                 return BTP.inbound_connect(self.socket,
                                            self.uuid,
                                            self.socket_recv_buf_size)

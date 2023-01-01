@@ -4,7 +4,7 @@ import socket
 from ssl import SSLContext
 from typing import Optional
 
-from protocol import ProtocolType
+from protocols import ProtocolEnum
 from config import OutboundConfig
 from protocols import BTP
 
@@ -12,7 +12,7 @@ from protocols import BTP
 class Outbound:
     host: str
     port: int
-    protocol: ProtocolType
+    protocol: ProtocolEnum
     uuid: str
     tls: bool
     unsafe_socket: socket = None
@@ -39,7 +39,7 @@ class Outbound:
     def socket_connect(self):
         # getaddrinfo -> [(family, socket_type, proto, canonname, target_addr),]
         host, port = self.host, self.port
-        if self.protocol == ProtocolType.FREEDOM:
+        if self.protocol == ProtocolEnum.FREEDOM:
             print(f'outbound connect to {self.target_host}: {self.target_port}')
             host, port = self.target_host, self.target_port
 
@@ -65,7 +65,7 @@ class Outbound:
                                                    server_hostname=self.host)
 
         match self.protocol:
-            case ProtocolType.BTP:
+            case ProtocolEnum.BTP:
                 if payload is None:
                     payload = ''
                 payload = BTP.outbound_connect(self.socket,
