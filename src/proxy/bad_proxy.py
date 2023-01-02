@@ -2,7 +2,7 @@ import select
 import traceback
 
 from src.config import Config
-from src.protocols import BTPException
+from src.protocols import BTPException, HttpResponse
 from .inbound import Inbound
 from .outbound import Outbound
 
@@ -54,8 +54,9 @@ class BadProxy(object):
 
                 # inbound received, outbound send data
                 if sock is self.inbound.socket:
-                    self.outbound.socket.send(data)
+                    # print('inbound recv', data)
+                    self.outbound.send(data)
                 # outbound received, inbound send data
                 elif sock is self.outbound.socket:
-                    print('outbound recv', data)
-                    self.inbound.socket.send(data)
+                    # print('outbound recv', data)
+                    self.inbound.send(data)

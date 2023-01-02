@@ -98,6 +98,9 @@ class Outbound:
         return self.socket.recv(self.buff_size)
 
     def send(self, raw_data: bytes):
+        if self.protocol is ProtocolEnum.REVERSE:
+            raw_data = raw_data.replace(b'Host: localhost:8888',
+                                        b'Host: www.google.com')
         self.socket.send(raw_data)
 
     def fallback(self, raw_data: bytes):
@@ -114,7 +117,6 @@ class Outbound:
         rewrite_data = raw_data.replace(http_request.host, target_host)
         self.socket.send(rewrite_data)
         resp_data = self.socket.recv(self.buff_size)
-        self.reverse_connect(resp_data)
 
     def close(self):
         if self.socket is not None:

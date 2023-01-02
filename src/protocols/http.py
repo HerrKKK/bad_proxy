@@ -139,15 +139,7 @@ class HTTP:
                                  raw_data: bytes,
                                  buff_size: int | None = 8192) -> bytes:
         # replace domain of proxy itself to target
-
         rewritten_data = raw_data.replace(proxy_addr, target_addr)
-        # if payload 301, rewrite
-        # response = HttpResponse(rewritten_data)
-        # print(response.status_code)
-        # if response.status_code == b'301' or response.status_code == b'302':
-        #     HTTP.rewrite_redirect(outbound_socket,
-        #                           )
-        print('outbound send ', rewritten_data)
         return rewritten_data
 
     @staticmethod
