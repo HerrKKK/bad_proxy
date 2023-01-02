@@ -9,7 +9,7 @@ class BoundConfig:
     protocol: ProtocolEnum
     uuid: str
     tls: bool
-    buf_size: int = 8 * 1024
+    buff_size: int = 8 * 1024
 
     def __init__(self,
                  host: str = None,

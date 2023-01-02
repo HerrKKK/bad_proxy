@@ -102,46 +102,46 @@ class BTP:
     @staticmethod
     def inbound_connect(inbound_socket: socket,
                         inbound_uuid: str,
-                        buf_size: int | None = 8192) -> (str, int, bytes):
-        req_data = inbound_socket.recv(buf_size)
-        if req_data == b'':
+                        buff_size: int | None = 8192) -> (str, int, bytes):
+        raw_data = inbound_socket.recv(buff_size)
+        if raw_data == b'':
             print('inbound connecting receiving none data')
             return None, None, None
 
-        btp_request = BTPRequest(req_data)
+        btp_request = BTPRequest(raw_data)
 
         if btp_request.digest != hmac.new(UUID(inbound_uuid).bytes,
                                           btp_request.body,
                                           'sha256').digest():
-            raise BTPException('btp auth failure', req_data)
+            raise BTPException('btp auth failure', raw_data)
         if btp_request.directive != BTPDirective.CONNECT:
-            raise BTPException('wrong directive', req_data)
+            raise BTPException('wrong directive', raw_data)
 
         btp_token = secrets.token_bytes(nbytes=8)
         # the random token will be attached to the head of  the first package
         inbound_socket.send(BTP.encode_response(btp_token))
-        req_data = inbound_socket.recv(buf_size)  # listen immediately
+        raw_data = inbound_socket.recv(buff_size)  # listen immediately
 
-        if req_data[:8] != btp_token:
-            raise BTPException('btp challenge failure', req_data)
+        if raw_data[:8] != btp_token:
+            raise BTPException('btp challenge failure', raw_data)
 
         return btp_request.host.encode(),\
             btp_request.port,\
-            req_data[8:]  # btp_request.payload
+            raw_data[8:]  # btp_request.payload
 
     @staticmethod
     def outbound_connect(outbound_socket: socket,
                          target_host: str,  # tell server to connect target host
                          target_port: int,
                          outbound_uuid: str,
-                         buf_size: int | None = 8192) -> bytes:  # return first package
+                         buff_size: int | None = 8192) -> bytes:  # return first package
         btp_request = BTP.encode_request(target_host,
                                          target_port,
                                          outbound_uuid,
                                          BTPDirective.CONNECT)
         outbound_socket.send(btp_request)
         # return btp token, the challenge for protecting any replay
-        return BTPResponse(outbound_socket.recv(buf_size)).payload
+        return BTPResponse(outbound_socket.recv(buff_size)).payload
 
     @staticmethod
     def encode_request(host: str,

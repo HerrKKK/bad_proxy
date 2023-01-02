@@ -16,7 +16,7 @@ class Inbound:
         self.port = config.port
         self.protocol = config.protocol
         self.uuid = config.uuid
-        self.buff_size = config.buf_size
+        self.buff_size = config.buff_size
 
     def listen(self, socket_proxy):
         # listen to any connection to the inbound and get its socket

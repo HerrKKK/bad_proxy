@@ -53,9 +53,6 @@ class HTTP:
         tmp = b'%s//%s' % (http_request.req_uri.split(b'//')[0], http_request.host)
         raw_data = raw_data.replace(tmp, b'')
 
-        # HTTP
-        if http_request.method in [b'GET', b'POST', b'PUT', b'DELETE', b'HEAD']:
-            pass
         # HTTPS
         if http_request.method == b'CONNECT':
             success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \
