@@ -5,7 +5,7 @@ from ssl import SSLContext
 
 from src.protocols import ProtocolEnum
 from src.config import OutboundConfig
-from src.protocols import BTP
+from src.protocols import BTP, HttpRequest, HTTP
 
 
 class Outbound:
@@ -40,10 +40,10 @@ class Outbound:
         # getaddrinfo -> [(family, socket_type, proto, canonname, target_addr),]
         host, port = self.host, self.port
         if self.protocol == ProtocolEnum.FREEDOM:
-            print(f'outbound connect to {self.target_host}: {self.target_port}')
             host, port = self.target_host, self.target_port
 
         (family, socket_type, _, _, target_addr) = socket.getaddrinfo(host, port)[0]
+        print(f'outbound connect to {target_addr}')
 
         self.unsafe_socket = socket.socket(family, socket_type)
         self.unsafe_socket.setblocking(False)
@@ -80,12 +80,27 @@ class Outbound:
                                                target_port,
                                                self.uuid,
                                                self.buff_size) + payload
+            case ProtocolEnum.REVERSE:
+                target_addr = b'%s:%d' % (self.host.encode(), self.port)
+                proxy_addr = b'%s:%d' % (target_host.encode(), target_port)
+                # rewrite url
+                payload = HTTP.reverse_outbound_connect(self.socket,
+                                                        proxy_addr,
+                                                        target_addr,
+                                                        payload,
+                                                        self.buff_size)
 
         # whether to send the first package from inbound
         if payload is not None:
             self.socket.send(payload)
 
-    def fallback(self):
+    def recv(self):
+        return self.socket.recv(self.buff_size)
+
+    def send(self, raw_data: bytes):
+        self.socket.send(raw_data)
+
+    def fallback(self, raw_data: bytes):
         """
         Warning:
         This is invoked as active detection detected!
@@ -93,9 +108,13 @@ class Outbound:
         connect it to a preset host:port,
         the protocol will be changed to HTTP/RAW
         """
-        self.host = 'google.com'
-        self.port = 443
+        target_host = b'google.com:80'
         self.protocol = ProtocolEnum.HTTP
+        http_request = HttpRequest(raw_data)
+        rewrite_data = raw_data.replace(http_request.host, target_host)
+        self.socket.send(rewrite_data)
+        resp_data = self.socket.recv(self.buff_size)
+        self.reverse_connect(resp_data)
 
     def close(self):
         if self.socket is not None:

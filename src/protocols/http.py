@@ -34,6 +34,39 @@ class HttpRequest:
         self.req_data = data[header_end + 4:]
 
 
+class HttpResponse:
+    version: bytes = None
+    status_code: bytes = None
+    headers: dict = {}
+
+    def __init__(self, data: bytes):
+        self.__parse(data)
+
+    def __parse(self, data: bytes):
+        """
+        HTTP/1.1 301 Moved Permanently\r\n
+        Host: test.test.com\r\n
+        Location: test.test.com\r\n
+        Content-Type: text/html\r\n
+        Cache-Control: max-age=0\r\n\r\n
+        """
+        resp_line_end = data.find(b'\r\n')  # end of the request line
+        header_end = data.find(b'\r\n\r\n')  # end of the header
+
+        # Request-Line
+        self.resp_line = data[:resp_line_end]
+        # method request_uri version in request line
+        resp_line_tokens = self.resp_line.split(b' ')
+        self.version, self.status_code = resp_line_tokens[0], resp_line_tokens[1]
+
+        # Response Header Fields
+        headers = data[resp_line_end + 2: header_end]
+        for header in headers.split(b'\r\n'):
+            k, v = header.split(b': ')
+            self.headers[k] = v
+        self.resp_data = data[header_end + 4:]
+
+
 class HTTP:
     redirect_header = b'HTTP/1.1 301 Moved Permanently\r\n' \
                     + b'Cache-Control: no-store\r\n' \
@@ -79,6 +112,49 @@ class HTTP:
         if isinstance(target_port, bytes):
             target_port = int(target_port.decode())
         return target_host.decode(), target_port, req_data
+
+    @staticmethod
+    def reverse_inbound_connect(inbound_socket: socket,
+                                buff_size: int | None = 8192) -> (str,
+                                                                  int,
+                                                                  bytes | HttpRequest):
+        req_data = inbound_socket.recv(buff_size)
+        if req_data == b'':
+            print('inbound received none data')
+            return None, None, None
+
+        # parse http request
+        http_packet = HttpRequest(req_data)
+        target_host, target_port = http_packet.host.split(b':') \
+            if b':' in http_packet.host else (http_packet.host, 80)
+
+        if isinstance(target_port, bytes):
+            target_port = int(target_port.decode())
+        return target_host.decode(), target_port, req_data
+
+    @staticmethod
+    def reverse_outbound_connect(outbound_socket: socket,
+                                 proxy_addr: bytes,
+                                 target_addr: bytes,
+                                 raw_data: bytes,
+                                 buff_size: int | None = 8192) -> bytes:
+        # replace domain of proxy itself to target
+
+        rewritten_data = raw_data.replace(proxy_addr, target_addr)
+        # if payload 301, rewrite
+        # response = HttpResponse(rewritten_data)
+        # print(response.status_code)
+        # if response.status_code == b'301' or response.status_code == b'302':
+        #     HTTP.rewrite_redirect(outbound_socket,
+        #                           )
+        print('outbound send ', rewritten_data)
+        return rewritten_data
+
+    @staticmethod
+    def rewrite_redirect(outbound_socket: socket,
+                         raw_data: bytes,
+                         buff_size: int | None = 8192) -> bytes:
+        pass
 
     @staticmethod
     def send_fake_response(server_socket: socket):

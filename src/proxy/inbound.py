@@ -31,6 +31,16 @@ class Inbound:
                 return BTP.inbound_connect(self.socket,
                                            self.uuid,
                                            self.buff_size)
+            case ProtocolEnum.REVERSE:
+                # return (proxy_host, proxy_port, rewritten data)
+                return HTTP.reverse_inbound_connect(self.socket,
+                                                    self.buff_size)
+
+    def recv(self):
+        return self.socket.recv(self.buff_size)
+
+    def send(self, raw_data: bytes):
+        self.socket.send(raw_data)
 
     def fallback(self, raw_data: bytes):
         """

@@ -1,4 +1,5 @@
 import select
+import traceback
 
 from src.config import Config
 from src.protocols import BTPException
@@ -22,7 +23,7 @@ class BadProxy(object):
             self.async_listen()
         except BTPException as e:
             print('invalid btp in connection: ', e)
-            # self.outbound.fallback()
+            # self.outbound.fallback(e.raw_data)
             # self.inbound.fallback(e.raw_data)
             # # send first package to specified host
             # self.outbound.connect()
@@ -30,6 +31,7 @@ class BadProxy(object):
             # self.inbound.create_fake_connection()
         except Exception as e:
             print('fatal error: ', e)
+            traceback.print_exc()
         finally:
             self.inbound.close()
             self.outbound.close()
@@ -55,4 +57,5 @@ class BadProxy(object):
                     self.outbound.socket.send(data)
                 # outbound received, inbound send data
                 elif sock is self.outbound.socket:
+                    print('outbound recv', data)
                     self.inbound.socket.send(data)
