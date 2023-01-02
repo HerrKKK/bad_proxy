@@ -1,4 +1,4 @@
-from .btp import BTP, BTPRequest, BTPResponse, BTPException
+from .btp import BTP, BTPRequest, BTPResponse, BTPException, BTPDirective
 from .http import HTTP, HttpRequest
 
 

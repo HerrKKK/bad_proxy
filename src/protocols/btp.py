@@ -119,17 +119,18 @@ class BTP:
         if btp_request.directive != BTPDirective.CONNECT:
             raise BTPException('wrong directive', raw_data)
 
-        btp_token = secrets.token_bytes(nbytes=BTP.TOKEN_LEN)
-        # the random token will be attached to the head of  the first package
-        inbound_socket.send(BTP.encode_response(btp_token))
-        raw_data = inbound_socket.recv(buff_size)  # listen immediately
+        # btp_token = secrets.token_bytes(n bytes=BTP.TOKEN_LEN)
+        # # the random token will be attached to the head of  the first package
+        # inbound_socket.send(BTP.encode_response(btp_token))
+        # raw_data = inbound_socket.recv(buff_size)  # listen immediately
+        # if raw_data[:BTP.TOKEN_LEN] != btp_token:
+        #     raise BTPException('btp challenge failure', raw_data)
+        # raw_data = inbound_socket.recv(buff_size)  # listen immediately
 
-        if raw_data[:BTP.TOKEN_LEN] != btp_token:
-            raise BTPException('btp challenge failure', raw_data)
-
+        # need a bloom filter or hash set
         return btp_request.host.encode(),\
             btp_request.port,\
-            raw_data[BTP.TOKEN_LEN:]  # btp_request.payload
+            btp_request.payload  # to be sent immediately
 
     @staticmethod
     def outbound_connect(outbound_socket: socket,

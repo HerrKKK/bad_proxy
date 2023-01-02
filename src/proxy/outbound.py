@@ -5,7 +5,7 @@ from ssl import SSLContext
 
 from src.protocols import ProtocolEnum
 from src.config import OutboundConfig
-from src.protocols import BTP
+from src.protocols import BTP, BTPDirective
 
 
 class Outbound:
@@ -64,15 +64,21 @@ class Outbound:
             self.socket = self.context.wrap_socket(self.unsafe_socket,
                                                    server_hostname=self.host)
 
-        match self.protocol:
-            case ProtocolEnum.BTP:
-                if payload is None:
-                    payload = ''
-                payload = BTP.outbound_connect(self.socket,
-                                               target_host,
-                                               target_port,
-                                               self.uuid,
-                                               self.buff_size) + payload
+        # if self.protocol is ProtocolEnum.BTP:
+        #     if payload is None:
+        #         payload = ''
+        #     payload = BTP.outbound_connect(target_host,
+        #                                    target_port,
+        #                                    self.uuid,
+        #                                    payload,
+        #                                    self.buff_size) + payload
+
+        if self.protocol is ProtocolEnum.BTP:
+            payload = BTP.encode_request(target_host,
+                                         target_port,
+                                         self.uuid,
+                                         BTPDirective.CONNECT,
+                                         payload)
 
         # whether to send the first package from inbound
         if payload is not None:
