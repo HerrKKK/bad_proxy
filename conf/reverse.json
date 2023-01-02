@@ -3,7 +3,7 @@
     "host": "0.0.0.0",
     "port": 8888,
     "protocol": "reverse"
-},
+  },
   "outbound": {
     "host": "www.amd.com",
     "port": 443,

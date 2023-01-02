@@ -20,6 +20,8 @@ class Outbound:
     context: SSLContext
     target_host: str
     target_port: int
+    reverse_target_addr: bytes  # without port
+    proxy_addr: bytes   # with port
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
@@ -81,12 +83,12 @@ class Outbound:
                                                self.uuid,
                                                self.buff_size) + payload
             case ProtocolEnum.REVERSE:
-                target_addr = b'%s:%d' % (self.host.encode(), self.port)
-                proxy_addr = b'%s:%d' % (target_host.encode(), target_port)
+                self.reverse_target_addr = self.host.encode()
+                self.proxy_addr = b'%s:%d' % (target_host.encode(), target_port)
                 # rewrite url
                 payload = HTTP.reverse_outbound_connect(self.socket,
-                                                        proxy_addr,
-                                                        target_addr,
+                                                        self.proxy_addr,
+                                                        self.reverse_target_addr,
                                                         payload,
                                                         self.buff_size)
 
@@ -94,13 +96,16 @@ class Outbound:
         if payload is not None:
             self.socket.send(payload)
 
-    def recv(self):
-        return self.socket.recv(self.buff_size)
+    def process(self, raw_data: bytes):
+        if self.protocol is ProtocolEnum.REVERSE:
+            return raw_data.replace(self.reverse_target_addr,
+                                    self.proxy_addr)
+        return raw_data
 
     def send(self, raw_data: bytes):
         if self.protocol is ProtocolEnum.REVERSE:
-            raw_data = raw_data.replace(b'Host: localhost:8888',
-                                        b'Host: www.google.com')
+            raw_data = raw_data.replace(self.proxy_addr,
+                                        self.reverse_target_addr)
         self.socket.send(raw_data)
 
     def fallback(self, raw_data: bytes):

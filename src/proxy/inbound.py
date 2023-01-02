@@ -36,13 +36,10 @@ class Inbound:
                 return HTTP.reverse_inbound_connect(self.socket,
                                                     self.buff_size)
 
-    def recv(self):
-        return self.socket.recv(self.buff_size)
+    # def process(self, raw_data: bytes):
+    #     return raw_data
 
     def send(self, raw_data: bytes):
-        if self.protocol is ProtocolEnum.REVERSE:
-            raw_data = raw_data.replace(b'Host: www.google.com',
-                                        b'Host: localhost:8888')
         self.socket.send(raw_data)
 
     def fallback(self, raw_data: bytes):
