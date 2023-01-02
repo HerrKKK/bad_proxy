@@ -115,10 +115,12 @@ class HTTP:
 
     @staticmethod
     def reverse_inbound_connect(inbound_socket: socket,
-                                buff_size: int | None = 8192) -> (str,
-                                                                  int,
-                                                                  bytes | HttpRequest):
-        req_data = inbound_socket.recv(buff_size)
+                                buff_size: int | None = 8192,
+                                req_data: bytes | None = None) -> (str,
+                                                                   int,
+                                                                   bytes):
+        if req_data is None:
+            req_data = inbound_socket.recv(buff_size)
         if req_data == b'':
             print('inbound received none data')
             return None, None, None
@@ -133,20 +135,12 @@ class HTTP:
         return target_host.decode(), target_port, req_data
 
     @staticmethod
-    def reverse_outbound_connect(outbound_socket: socket,
-                                 proxy_addr: bytes,
+    def reverse_outbound_connect(proxy_addr: bytes,
                                  target_addr: bytes,
-                                 raw_data: bytes,
-                                 buff_size: int | None = 8192) -> bytes:
+                                 raw_data: bytes) -> bytes:
         # replace domain of proxy itself to target
         rewritten_data = raw_data.replace(proxy_addr, target_addr)
         return rewritten_data
-
-    @staticmethod
-    def rewrite_redirect(outbound_socket: socket,
-                         raw_data: bytes,
-                         buff_size: int | None = 8192) -> bytes:
-        pass
 
     @staticmethod
     def send_fake_response(server_socket: socket):

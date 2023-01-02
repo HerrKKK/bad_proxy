@@ -42,15 +42,15 @@ class Inbound:
     def send(self, raw_data: bytes):
         self.socket.send(raw_data)
 
-    def fallback(self, raw_data: bytes):
+    def fallback(self):
         """
+        EXPERIMENTAL: DO NOT USE IT
         Warning:
         This is invoked as active detection detected!
         The function discard the inbound,
         the protocol will be changed to HTTP
         """
-        self.protocol = ProtocolEnum.HTTP
-        HTTP.handle_http_raw_data(self.socket, raw_data)
+        self.protocol = ProtocolEnum.REVERSE
 
     def create_fake_connection(self):
         HTTP.send_fake_response(self.socket)

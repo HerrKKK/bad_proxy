@@ -2,7 +2,7 @@ import select
 import traceback
 
 from src.config import Config
-from src.protocols import BTPException, HttpResponse
+from src.protocols import HTTP, HttpRequest, BTPException
 from .inbound import Inbound
 from .outbound import Outbound
 
@@ -23,14 +23,22 @@ class BadProxy(object):
             self.async_listen()
         except BTPException as e:
             print('invalid btp in connection: ', e)
-            # self.outbound.fallback(e.raw_data)
-            # self.inbound.fallback(e.raw_data)
-            # # send first package to specified host
-            # self.outbound.connect()
-            # self.async_listen()
-            # self.inbound.create_fake_connection()
+            if self.outbound.fallback_host is not None:
+                self.inbound.fallback()
+                self.outbound.fallback()
+
+                (target_host,
+                 target_port,
+                 payload) = HTTP.reverse_inbound_connect(self.inbound.socket,
+                                                         self.inbound.buff_size,
+                                                         e.raw_data)
+                self.outbound.connect(target_host, target_port, payload)
+                self.async_listen()
+            else:
+                HttpRequest(e.raw_data)  # check if a http request
+                HTTP.send_fake_response(self.inbound.socket)
         except Exception as e:
-            print('fatal error: ', e)
+            print(e)
             traceback.print_exc()
         finally:
             self.inbound.close()

@@ -5,7 +5,7 @@ from ssl import SSLContext
 
 from src.protocols import ProtocolEnum
 from src.config import OutboundConfig
-from src.protocols import BTP, HttpRequest, HTTP
+from src.protocols import BTP, HTTP
 
 
 class Outbound:
@@ -22,6 +22,7 @@ class Outbound:
     target_port: int
     reverse_target_addr: bytes  # without port
     proxy_addr: bytes   # with port
+    fallback_host: str = None
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
@@ -29,6 +30,7 @@ class Outbound:
         self.protocol = config.protocol
         self.uuid = config.uuid
         self.buff_size = config.buf_size
+        self.fallback_host = config.fallback_host
 
         self.tls = config.tls
         if self.tls is True:
@@ -86,11 +88,9 @@ class Outbound:
                 self.reverse_target_addr = self.host.encode()
                 self.proxy_addr = b'%s:%d' % (target_host.encode(), target_port)
                 # rewrite url
-                payload = HTTP.reverse_outbound_connect(self.socket,
-                                                        self.proxy_addr,
+                payload = HTTP.reverse_outbound_connect(self.proxy_addr,
                                                         self.reverse_target_addr,
-                                                        payload,
-                                                        self.buff_size)
+                                                        payload)
 
         # whether to send the first package from inbound
         if payload is not None:
@@ -108,20 +108,16 @@ class Outbound:
                                         self.reverse_target_addr)
         self.socket.send(raw_data)
 
-    def fallback(self, raw_data: bytes):
+    def fallback(self):
         """
         Warning:
         This is invoked as active detection detected!
-        The function discard the outbound,
-        connect it to a preset host:port,
-        the protocol will be changed to HTTP/RAW
+        The function discard the outbound
+        and replace it with a reverse proxy to a preset hostname
         """
-        target_host = b'google.com:80'
-        self.protocol = ProtocolEnum.HTTP
-        http_request = HttpRequest(raw_data)
-        rewrite_data = raw_data.replace(http_request.host, target_host)
-        self.socket.send(rewrite_data)
-        resp_data = self.socket.recv(self.buff_size)
+        self.host = self.fallback_host
+        self.port = 80
+        self.protocol = ProtocolEnum.REVERSE
 
     def close(self):
         if self.socket is not None:

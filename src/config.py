@@ -40,12 +40,15 @@ class InboundConfig(BoundConfig):
 
 class OutboundConfig(BoundConfig):
     tls_root_ca_path: str
+    fallback_host: str
 
     def __init__(self,
                  tls_root_ca_path: str | None = None,
+                 fallback_host: str | None = None,
                  **kwargs):
         super().__init__(**kwargs)
         self.tls_root_ca_path = tls_root_ca_path
+        self.fallback_host = fallback_host
 
 
 class Config:

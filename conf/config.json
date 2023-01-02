@@ -5,7 +5,7 @@
     "protocol": "reverse"
 },
   "outbound": {
-    "host": "www.amd.com",
+    "host": "www.google.com",
     "port": 443,
     "protocol": "reverse",
     "tls": true
