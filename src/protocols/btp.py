@@ -99,6 +99,8 @@ class BTPException(Exception):
 
 
 class BTP:
+    TOKEN_LEN: int = 32
+
     @staticmethod
     def inbound_connect(inbound_socket: socket,
                         inbound_uuid: str,
@@ -117,17 +119,17 @@ class BTP:
         if btp_request.directive != BTPDirective.CONNECT:
             raise BTPException('wrong directive', raw_data)
 
-        btp_token = secrets.token_bytes(nbytes=8)
+        btp_token = secrets.token_bytes(nbytes=BTP.TOKEN_LEN)
         # the random token will be attached to the head of  the first package
         inbound_socket.send(BTP.encode_response(btp_token))
         raw_data = inbound_socket.recv(buff_size)  # listen immediately
 
-        if raw_data[:8] != btp_token:
+        if raw_data[:BTP.TOKEN_LEN] != btp_token:
             raise BTPException('btp challenge failure', raw_data)
 
         return btp_request.host.encode(),\
             btp_request.port,\
-            raw_data[8:]  # btp_request.payload
+            raw_data[BTP.TOKEN_LEN:]  # btp_request.payload
 
     @staticmethod
     def outbound_connect(outbound_socket: socket,
@@ -149,8 +151,9 @@ class BTP:
                        uuid_str: str,
                        direct: BTPDirective = BTPDirective.CONNECT,
                        payload: bytes | None = b'') -> bytes:
-        timestamp = (int(time.time()) + secret_generator.randint(0, 60) - 30)\
-            .to_bytes(4, 'big')
+        timestamp = (int(time.time())
+                     + secret_generator.randint(0, 60)
+                     - 30).to_bytes(4, 'big')
 
         confusion_len = secret_generator.randint(7, 32)
         confusion = secrets.token_bytes(nbytes=confusion_len)
@@ -179,7 +182,7 @@ class BTP:
         :param data: plain bytes
         :return: BTP form response
         """
-        confusion_len = secret_generator.randint(32, 64)
+        confusion_len = secret_generator.randint(64, 128)
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
         return confusion_len + confusion + data
