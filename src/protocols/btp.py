@@ -5,6 +5,7 @@ import time
 
 from uuid import UUID
 from enum import IntEnum
+from src.lru import btp_lru
 
 secret_generator = secrets.SystemRandom()
 
@@ -91,9 +92,9 @@ class BTPDirective(IntEnum):
 
 
 class BTPException(Exception):
-    raw_data: str = None
+    raw_data: bytes = None
 
-    def __init__(self, msg: str, raw_data):
+    def __init__(self, msg: str, raw_data: bytes):
         super().__init__(msg)
         self.raw_data = raw_data
 
@@ -118,6 +119,8 @@ class BTP:
             raise BTPException('btp auth failure', raw_data)
         if btp_request.directive != BTPDirective.CONNECT:
             raise BTPException('wrong directive', raw_data)
+
+        btp_lru.add(btp_request.digest)
 
         # btp_token = secrets.token_bytes(n bytes=BTP.TOKEN_LEN)
         # # the random token will be attached to the head of  the first package
