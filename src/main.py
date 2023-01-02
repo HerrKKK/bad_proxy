@@ -19,7 +19,7 @@ class StartUp:
 
     def start(self, config: Config):
         self.socket_proxy_unsafe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # 将SO_REUSEADDR标记为True, 当socket关闭后，立刻回收该socket的端口
+        # recycle the port after socket closed
         self.socket_proxy_unsafe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket_proxy_unsafe.bind((config.inbound_config.host,
                                        config.inbound_config.port))
@@ -48,7 +48,7 @@ class StartUp:
 
 
 if __name__ == '__main__':
-    config_filename = None
+    config_filename = 'config.json'
     try:
         opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])
         for opt, arg in opts:

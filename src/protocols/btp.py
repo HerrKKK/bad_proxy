@@ -35,7 +35,7 @@ class BTPRequest:
                                         byteorder='big',
                                         signed=False)
         if abs(int(time.time()) - self.timestamp) > 180:
-            raise BTPException('timeout')
+            raise BTPException('timeout', data)
         base += 4
 
         self.confusion_len = int.from_bytes(data[base: base + 1],
@@ -62,7 +62,7 @@ class BTPRequest:
         base += 2
 
         if base - self.confusion_len - self.host_len != 41:
-            raise BTPException('wrong btp request length')
+            raise BTPException('wrong btp request length', data)
         self.payload = data[base:]
 
 
@@ -91,8 +91,11 @@ class BTPDirective(IntEnum):
 
 
 class BTPException(Exception):
-    def __init__(self, msg: str):
-        super(msg)
+    raw_data: str = None
+
+    def __init__(self, msg: str, raw_data):
+        super().__init__(msg)
+        self.raw_data = raw_data
 
 
 class BTP:
@@ -110,9 +113,9 @@ class BTP:
         if btp_request.digest != hmac.new(UUID(inbound_uuid).bytes,
                                           btp_request.body,
                                           'sha256').digest():
-            raise BTPException('btp auth failure')
+            raise BTPException('btp auth failure', req_data)
         if btp_request.directive != BTPDirective.CONNECT:
-            raise BTPException('wrong directive')
+            raise BTPException('wrong directive', req_data)
 
         btp_token = secrets.token_bytes(nbytes=8)
         # the random token will be attached to the head of  the first package
@@ -120,7 +123,7 @@ class BTP:
         req_data = inbound_socket.recv(buf_size)  # listen immediately
 
         if req_data[:8] != btp_token:
-            raise BTPException('btp challenge failure')
+            raise BTPException('btp challenge failure', req_data)
 
         return btp_request.host.encode(),\
             btp_request.port,\

@@ -1,7 +1,7 @@
 import select
 
 from src.config import Config
-from src.protocols import BTPException
+from src.protocols import BTPException, HttpRequest
 from .inbound import Inbound
 from .outbound import Outbound
 
@@ -22,9 +22,8 @@ class BadProxy(object):
             self.async_listen()
         except BTPException as e:
             print('invalid btp in connection', e)
-            self.inbound.create_fake_connection()
-        except Exception as e:
-            print(e)
+            HttpRequest(e.raw_data)  # check if a http request
+            self.inbound.send_fake_response()
         finally:
             self.inbound.close()
             self.outbound.close()
