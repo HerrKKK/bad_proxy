@@ -51,7 +51,7 @@ class StartUp:
                 print(e)
 
     def main(self):
-        config_filename = 'config.json'
+        config_filename = 'conf/config.json'
         try:
             opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])
             for opt, arg in opts:
