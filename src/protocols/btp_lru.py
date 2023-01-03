@@ -32,21 +32,21 @@ class LRU:
     __head: CacheData  # newest
     __tail: CacheData  # oldest
     """
-    BTP enforce a 180s timeout while the time has a 30s fluctuation
+    BTP enforce a 210s timeout while the time has a 30s fluctuation
     compared with the real time which means a valid package received
-    210s before can be still valid on received again.
-    The lru stores 200000 previous received package, a package received
-    210s before cannot be replay unless server received more then
-    200000 VALID btp connection in 210s to push it out, the qps under
-    this condition is 200000/210 ~= 952, exceeding target performance
-    When the lru is fulfilled: __cache takes 8388824 (8M),
-    a CacheData or ListNode takes 48 Bytes total memory taken will be:
-    (48 * 2 + 32) * 200000 Bytes + 8M ~= 32MB, acceptable!
+    240s before can be still valid on received again.
+    The lru stores 240000 previous received package, a package received
+    240s before cannot be replay unless server received more then
+    240000 VALID btp connection in 240s to push it out, the qps under
+    this condition is 240000/240 = 1000, exceeding target performance
+    When the lru size is 200000, __cache takes 8388824 (8M) memory,
+    a CacheData or ListNode takes 48 Bytes; Total memory taken under
+    240000 data will be: ((48*2+32)*200000+8M)*1.2 ~= 38MB, acceptable!
     """
-    __max_size = 200000
+    __max_size: int = 240000
     __size: int = 0
 
-    def __init__(self, max_size: int | None = 200000):
+    def __init__(self, max_size: int | None = 240000):
         self.__max_size = max_size
         assert max_size > 0
 

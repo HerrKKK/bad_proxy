@@ -41,7 +41,7 @@ class BTPRequest:
         self.timestamp = int.from_bytes(data[base: base + 4],
                                         byteorder='big',
                                         signed=False)
-        if abs(int(time.time()) - self.timestamp) > 180:
+        if abs(int(time.time()) - self.timestamp) > BTP.TIMEOUT:
             raise BTPException('timeout', data)
         base += 4
 
@@ -104,6 +104,7 @@ class BTP:
     TOKEN_LEN: int = 32
     REQUEST_CONFUSION_LEN = (0, 64)
     RESPONSE_CONFUSION_LEN = (64, 128)
+    TIMEOUT = 210
 
     @staticmethod
     def inbound_connect(inbound_socket: socket,
