@@ -82,7 +82,6 @@ class LRU:
             prev_node.node.next = self.__tail
             self.__size -= 1
 
-        print(self.__size)
         self.__lock.release()
 
 

@@ -32,17 +32,17 @@ class BTPRequest:
         base += 32
         self.body = data[base:]
 
+        self.confusion_len = int.from_bytes(data[base: base + 1],
+                                            byteorder='big',
+                                            signed=False)
+        base += 1 + self.confusion_len
+
         self.timestamp = int.from_bytes(data[base: base + 4],
                                         byteorder='big',
                                         signed=False)
         if abs(int(time.time()) - self.timestamp) > 180:
             raise BTPException('timeout', data)
         base += 4
-
-        self.confusion_len = int.from_bytes(data[base: base + 1],
-                                            byteorder='big',
-                                            signed=False)
-        base += 1 + self.confusion_len
 
         self.directive = int.from_bytes(data[base: base + 1],
                                         byteorder='big',
@@ -101,6 +101,8 @@ class BTPException(Exception):
 
 class BTP:
     TOKEN_LEN: int = 32
+    REQUEST_CONFUSION_LEN = (0, 64)
+    RESPONSE_CONFUSION_LEN = (64, 128)
 
     @staticmethod
     def inbound_connect(inbound_socket: socket,
@@ -155,22 +157,27 @@ class BTP:
                        uuid_str: str,
                        direct: BTPDirective = BTPDirective.CONNECT,
                        payload: bytes | None = b'') -> bytes:
+        confusion_len = secret_generator.randint(*BTP.REQUEST_CONFUSION_LEN)
+        confusion = secrets.token_bytes(nbytes=confusion_len)
+        confusion_len = confusion_len.to_bytes(1, 'big')
+
+        """
+        vmess use time to calculate hash value and store
+        all possible hash value in server to verify
+        it's a bit hard to implement
+        """
         timestamp = (int(time.time())
                      + secret_generator.randint(0, 60)
                      - 30).to_bytes(4, 'big')
-
-        confusion_len = secret_generator.randint(7, 32)
-        confusion = secrets.token_bytes(nbytes=confusion_len)
-        confusion_len = confusion_len.to_bytes(1, 'big')
 
         directive = int(direct).to_bytes(1, 'big')
         host_bytes = host.encode(encoding='utf-8')
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
 
-        body = timestamp \
-            + confusion_len \
+        body = confusion_len \
             + confusion \
+            + timestamp \
             + directive \
             + host_len \
             + host_bytes \
@@ -186,7 +193,7 @@ class BTP:
         :param data: plain bytes
         :return: BTP form response
         """
-        confusion_len = secret_generator.randint(64, 128)
+        confusion_len = secret_generator.randint(*BTP.RESPONSE_CONFUSION_LEN)
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
         return confusion_len + confusion + data
