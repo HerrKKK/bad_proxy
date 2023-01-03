@@ -83,6 +83,3 @@ class LRU:
             self.__size -= 1
 
         self.__lock.release()
-
-
-btp_lru = LRU()  # global singleton

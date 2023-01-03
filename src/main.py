@@ -17,7 +17,7 @@ class StartUp:
     def __del__(self):
         self.socket_proxy.close()
 
-    def start(self, config: Config):
+    def init(self, config: Config):
         self.socket_proxy_unsafe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # recycle the port after socket closed
         self.socket_proxy_unsafe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -34,6 +34,10 @@ class StartUp:
             self.socket_proxy = self.context.wrap_socket(self.socket_proxy_unsafe,
                                                          server_side=True)
 
+    def start(self, config: Config):
+        print('listening on ',
+              config.inbound_config.host,
+              config.inbound_config.port)
         while True:
             try:
                 instance = BadProxy(config)
@@ -46,20 +50,21 @@ class StartUp:
             except Exception as e:
                 print(e)
 
+    def main(self):
+        config_filename = 'config.json'
+        try:
+            opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])
+            for opt, arg in opts:
+                if opt in ('-c', '--config'):
+                    config_filename = arg
+        except Exception as ex:
+            print('error', ex)
+            sys.exit()
+
+        app_config = read_config(config_filename)
+        self.init(app_config)
+        self.start(app_config)
+
 
 if __name__ == '__main__':
-    config_filename = 'config.json'
-    try:
-        opts, _ = getopt.getopt(sys.argv[1:], 'c:', ['config='])
-        for opt, arg in opts:
-            if opt in ('-c', '--config'):
-                config_filename = arg
-    except Exception as ex:
-        print('error', ex)
-        sys.exit()
-
-    app_config = read_config(config_filename)
-    print('listening on ',
-          app_config.inbound_config.host,
-          app_config.inbound_config.port)
-    StartUp().start(app_config)
+    StartUp().main()

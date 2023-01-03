@@ -1,7 +1,7 @@
 import select
 
-from src.config import Config
-from src.protocols import BTPException, HttpRequest
+from config import Config
+from protocols import BTPException, HttpRequest
 from .inbound import Inbound
 from .outbound import Outbound
 

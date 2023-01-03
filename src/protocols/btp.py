@@ -5,9 +5,10 @@ import time
 
 from uuid import UUID
 from enum import IntEnum
-from src.lru import btp_lru
+from .btp_lru import LRU
 
 secret_generator = secrets.SystemRandom()
+btp_lru = LRU()  # global singleton
 
 
 class BTPRequest:

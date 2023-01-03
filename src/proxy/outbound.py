@@ -3,9 +3,9 @@ import socket
 
 from ssl import SSLContext
 
-from src.protocols import ProtocolEnum
-from src.config import OutboundConfig
-from src.protocols import BTP, BTPDirective
+from protocols import ProtocolEnum
+from config import OutboundConfig
+from protocols import BTP, BTPDirective
 
 
 class Outbound:
