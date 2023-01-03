@@ -1,5 +1,9 @@
+import sys
 import uuid
-from src.protocols import BTP, BTPRequest
+
+sys.path.append("../src")
+
+from protocols import BTP, BTPRequest
 
 
 def test_btp_request(host: str,

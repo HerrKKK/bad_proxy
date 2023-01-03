@@ -1,4 +1,7 @@
-from src.protocols import BTP, BTPResponse
+import sys
+sys.path.append("../src")
+
+from protocols import BTP, BTPResponse
 
 
 def test_btp_response(data: str):

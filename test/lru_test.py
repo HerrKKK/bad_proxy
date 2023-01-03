@@ -1,4 +1,7 @@
-from src.lru import LRU
+import sys
+sys.path.append("../src")
+
+from protocols.btp_lru import LRU
 
 
 lru = LRU()
