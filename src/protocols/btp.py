@@ -20,6 +20,8 @@ class BTPRequest:
     port: int             # 2 Bytes
     payload: bytes        # fixed length is 41
 
+    __startup_time: int = time.time()
+
     def __init__(self, data):
         self.__parse(data)
 
@@ -38,7 +40,8 @@ class BTPRequest:
         self.timestamp = int.from_bytes(data[base: base + 4],
                                         byteorder='big',
                                         signed=False)
-        if abs(int(time.time()) - self.timestamp) > BTP.TIMEOUT:
+        if self.timestamp < BTPRequest.__startup_time \
+                or abs(int(time.time()) - self.timestamp) > BTP.TIMEOUT:
             raise BTPException('timeout', data)
         base += 4
 
