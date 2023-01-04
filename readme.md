@@ -1,4 +1,4 @@
-### Bad Proxy
+## Bad Proxy
 自用垃圾代理，使用Bad Transfer Protocol传输数据，BTP还在构思中，也没测试过墙能力。
 
 只支持单用户，使用Python所以性能比较bad。
@@ -38,7 +38,7 @@ BTP是简单无状态应用层协议, 主要参考vless实现, 主要区别如�
 2. 协议首包直接发送数据, 这是跟Trojan学的, 可以避免包长度被探测,
 在此之上还加入了随机长度的混淆字段, 避免协议包头尤其是时间戳, 出现某些可能的特征
 
-## 安全性
+### 安全性
 1. 加密
 和vless一样, BTP不提供加密, 采用tls进行传输, 未来会提供websocket传输
 2. 重放攻击
@@ -48,7 +48,11 @@ BTP是简单无状态应用层协议, 主要参考vless实现, 主要区别如�
 3. 主动探测
 本来要实现个fallback的但是发现反向代理真是大坑, 所以只做了个假页面, 探测到http请求时返回
 
-## 小功能
+### 小功能
 使用了 [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community)
 维护的geolocation-cn系列文件做白名单, 其中的域名不进行代理直接freedom出站,
 用户须把该项目中的data文件夹内的全部文件拷贝到domains中, 即可进行读取
+
+## 未来计划
+- [ ] 支持websocket
+- [ ] 支持反向代理
