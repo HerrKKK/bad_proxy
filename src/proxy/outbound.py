@@ -6,6 +6,10 @@ from ssl import SSLContext
 from protocols import ProtocolEnum
 from config import OutboundConfig
 from protocols import BTP, BTPDirective
+from .domain_trie import DomainTrie
+
+exclude_domains = DomainTrie()  # global singleton
+exclude_domains.read_from_files('geolocation-cn')
 
 
 class Outbound:
@@ -39,7 +43,8 @@ class Outbound:
     def socket_connect(self):
         # getaddrinfo -> [(family, socket_type, proto, canonname, target_addr),]
         host, port = self.host, self.port
-        if self.protocol == ProtocolEnum.FREEDOM:
+        if self.protocol == ProtocolEnum.FREEDOM \
+                or exclude_domains.has_domain(self.target_host):  # Or cn ip/domains
             print(f'outbound connect to {self.target_host}: {self.target_port}')
             host, port = self.target_host, self.target_port
 
@@ -63,15 +68,6 @@ class Outbound:
         if self.tls is True:
             self.socket = self.context.wrap_socket(self.unsafe_socket,
                                                    server_hostname=self.host)
-
-        # if self.protocol is ProtocolEnum.BTP:
-        #     if payload is None:
-        #         payload = ''
-        #     payload = BTP.outbound_connect(target_host,
-        #                                    target_port,
-        #                                    self.uuid,
-        #                                    payload,
-        #                                    self.buff_size) + payload
 
         if self.protocol is ProtocolEnum.BTP:
             payload = BTP.encode_request(target_host,

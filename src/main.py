@@ -61,6 +61,7 @@ class StartUp:
             print('error', ex)
             sys.exit()
 
+        print(f'use {config_filename} as config')
         app_config = read_config(config_filename)
         self.init(app_config)
         self.start(app_config)

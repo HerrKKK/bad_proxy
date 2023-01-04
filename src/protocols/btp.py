@@ -126,15 +126,6 @@ class BTP:
 
         btp_lru.add(btp_request.digest)
 
-        # btp_token = secrets.token_bytes(n bytes=BTP.TOKEN_LEN)
-        # # the random token will be attached to the head of  the first package
-        # inbound_socket.send(BTP.encode_response(btp_token))
-        # raw_data = inbound_socket.recv(buff_size)  # listen immediately
-        # if raw_data[:BTP.TOKEN_LEN] != btp_token:
-        #     raise BTPException('btp challenge failure', raw_data)
-        # raw_data = inbound_socket.recv(buff_size)  # listen immediately
-
-        # need a bloom filter or hash set
         return btp_request.host.encode(),\
             btp_request.port,\
             btp_request.payload  # to be sent immediately
@@ -150,7 +141,7 @@ class BTP:
                                          outbound_uuid,
                                          BTPDirective.CONNECT)
         outbound_socket.send(btp_request)
-        # return btp token, the challenge for protecting any replay
+        # to be checked
         return BTPResponse(outbound_socket.recv(buff_size)).payload
 
     @staticmethod
