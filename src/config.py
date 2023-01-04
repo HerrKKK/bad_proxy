@@ -52,16 +52,14 @@ class Config:
     inbound_config: InboundConfig
     outbound_config: OutboundConfig
 
-    def __init__(self,
-                 inbound: dict | None = None,
-                 outbound: dict | None = None):
+    def __init__(self, filename: str):
+        with open(filename, 'r') as f:
+            text = f.read()
+            config_json = json.loads(text)
+            self.setup(**config_json)
+
+    def setup(self,
+              inbound: dict | None = None,
+              outbound: dict | None = None):
         self.inbound_config = InboundConfig(**inbound)
         self.outbound_config = OutboundConfig(**outbound)
-
-
-def read_config(filename: str) -> Config | None:
-    with open(filename, 'r') as f:
-        text = f.read()
-        config_json = json.loads(text)
-        config = Config(**config_json)
-        return config

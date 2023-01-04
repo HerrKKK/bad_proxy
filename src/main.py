@@ -5,7 +5,7 @@ import getopt
 import threading
 
 from proxy import BadProxy
-from config import Config, read_config
+from config import Config
 from ssl import SSLContext
 
 
@@ -62,7 +62,7 @@ class StartUp:
             sys.exit()
 
         print(f'use {config_filename} as config')
-        app_config = read_config(config_filename)
+        app_config = Config(config_filename)
         self.init(app_config)
         self.start(app_config)
 
