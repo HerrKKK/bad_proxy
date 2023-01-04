@@ -21,8 +21,9 @@ class BadProxy(object):
             self.outbound.connect(target_host, target_port, payload)
             self.async_listen()
         except BTPException as e:
-            print('invalid btp in connection', e)
-            HttpRequest(e.raw_data)  # check if a http request
+            print('invalid btp connection', e)
+            http_request = HttpRequest(e.raw_data)  # check if a http request
+            print(f'active http detection from {http_request.host}')
             self.inbound.send_fake_response()
         finally:
             self.inbound.close()

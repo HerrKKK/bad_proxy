@@ -39,7 +39,11 @@ class Outbound:
 
     def socket_connect(self):
         # getaddrinfo -> [(family, socket_type, proto, canonname, target_addr),]
-        (family, socket_type, _, _, target_addr) = socket.getaddrinfo(self.host, self.port)[0]
+        # if target
+        (family,
+         socket_type,
+         _, _,
+         target_addr) = socket.getaddrinfo(self.host, self.port)[0]
 
         self.unsafe_socket = socket.socket(family, socket_type)
         self.unsafe_socket.setblocking(False)
@@ -69,7 +73,7 @@ class Outbound:
             self.socket = self.context.wrap_socket(self.unsafe_socket,
                                                    server_hostname=self.host)
 
-        if self.protocol is ProtocolEnum.BTP:
+        if self.protocol is ProtocolEnum.BTP:  # btp outbound connect
             payload = BTP.encode_request(target_host,
                                          target_port,
                                          self.uuid,

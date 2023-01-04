@@ -1,15 +1,14 @@
 import sys
+import os
 sys.path.append("../src")
 
 from proxy.domain_trie import DomainTrie
 
-trie = DomainTrie()
+os.chdir('../')
 
-DomainTrie.DATA_PATH = '../domains/'
-trie.read_from_files('geolocation-cn')
+trie = DomainTrie.get_instance()
 
-print('baidu.com' in trie,
-      'google.com' in trie,
-      trie.has_domain('bilibili.bilipala.baidu.com'))
-trie.add('google.com')
-print('google.com' in trie)
+assert 'baidu.com' in trie
+assert 'google.com' not in trie
+assert trie.has_domain('bilibili.bilipala.baidu.com')
+assert 'wwr-blog.com' in trie

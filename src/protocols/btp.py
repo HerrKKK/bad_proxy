@@ -126,23 +126,9 @@ class BTP:
 
         btp_lru.add(btp_request.digest)
 
-        return btp_request.host.encode(),\
-            btp_request.port,\
-            btp_request.payload  # to be sent immediately
-
-    @staticmethod
-    def outbound_connect(outbound_socket: socket,
-                         target_host: str,  # tell server to connect target host
-                         target_port: int,
-                         outbound_uuid: str,
-                         buff_size: int | None = 8192) -> bytes:  # return first package
-        btp_request = BTP.encode_request(target_host,
-                                         target_port,
-                                         outbound_uuid,
-                                         BTPDirective.CONNECT)
-        outbound_socket.send(btp_request)
-        # to be checked
-        return BTPResponse(outbound_socket.recv(buff_size)).payload
+        return (btp_request.host.encode(),
+                btp_request.port,
+                btp_request.payload)  # to be sent immediately
 
     @staticmethod
     def encode_request(host: str,
