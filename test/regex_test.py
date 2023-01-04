@@ -16,5 +16,14 @@ def remove_comment(filename: str):
         file.write(output)
 
 
+def test_re():
+    with open('reg_test_field', 'r', encoding='utf-8') as f:
+        content = f.read()
+        # print(content)
+        pattern = re.compile(r'^.*$', re.MULTILINE)
+        res = pattern.findall(content)
+        print(res)
+
 if __name__ == '__main__':
-    remove_comment('lru_test.py')
+    # remove_comment('lru_test.py')
+    test_re()
