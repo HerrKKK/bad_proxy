@@ -4,9 +4,9 @@ import socket
 import getopt
 import threading
 
-from proxy import BadProxy
-from config import Config
 from ssl import SSLContext
+from proxy import BadProxy, DomainTrie
+from config import Config
 
 
 class StartUp:
@@ -33,6 +33,9 @@ class StartUp:
 
             self.socket_proxy = self.context.wrap_socket(self.socket_proxy_unsafe,
                                                          server_side=True)
+        if config.outbound_config.direct_connect_cn is True:
+            # init singleton to prevent concurrent issues later
+            DomainTrie.get_instance()
 
     def start(self, config: Config):
         print('listening on ',

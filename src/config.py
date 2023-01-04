@@ -40,11 +40,14 @@ class InboundConfig(BoundConfig):
 
 class OutboundConfig(BoundConfig):
     tls_root_ca_path: str
+    direct_connect_cn: bool = None
 
     def __init__(self,
                  tls_root_ca_path: str | None = None,
+                 direct_connect_cn: bool | None = None,
                  **kwargs):
         super().__init__(**kwargs)
+        self.direct_connect_cn = direct_connect_cn
         self.tls_root_ca_path = tls_root_ca_path
 
 

@@ -5,21 +5,11 @@ block_cipher = None
 
 
 a = Analysis(
-    [
-        'src\\main.py',
-        'src\\config.py',
-        'src\\protocols\\__init__.py',
-        'src\\protocols\\btp.py',
-        'src\\protocols\\btp_lru.py',
-        'src\\protocols\\http.py',
-        'src\\proxy\\__init__.py',
-        'src\\proxy\\bad_proxy.py',
-        'src\\proxy\\inbound.py',
-        'src\\proxy\\outbound.py',
-    ],
-    pathex=['C:\\Users\\wang.weiran\\Documents\\code\\wproxy\\src'],
+    ['src/main.py'],
+    pathex=['C:/Users/wang.weiran/Documents/code/wproxy/src'],
     binaries=[],
-    datas=[('conf\\config.json', 'conf')],
+    datas=[('conf/config.json', 'conf'),
+    ('domains/*', 'domains')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -57,5 +47,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='main',
+    name='bad_proxy',
 )
