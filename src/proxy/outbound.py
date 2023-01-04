@@ -21,6 +21,7 @@ class Outbound:
     context: SSLContext
     target_host: str
     target_port: int
+    direct_connect_cn: bool = False
 
     def __init__(self, config: OutboundConfig):
         self.host = config.host
@@ -28,6 +29,7 @@ class Outbound:
         self.protocol = config.protocol
         self.uuid = config.uuid
         self.buff_size = config.buff_size
+        self.direct_connect_cn = config.direct_connect_cn
 
         self.tls = config.tls
         if self.tls is True:
@@ -59,7 +61,8 @@ class Outbound:
         self.target_port = target_port
 
         # The domain trie will not init automatically, do not need to check if enabled
-        if DomainTrie.get_instance().has_domain(self.target_host):
+        if self.direct_connect_cn is True \
+                and DomainTrie.get_instance().has_domain(self.target_host):
             self.protocol = ProtocolEnum.FREEDOM
 
         if self.protocol == ProtocolEnum.FREEDOM:

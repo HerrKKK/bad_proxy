@@ -5,7 +5,7 @@ import getopt
 import threading
 
 from ssl import SSLContext
-from protocols import LRU
+from protocols import LRU, ProtocolEnum
 from proxy import BadProxy, DomainTrie
 from config import Config
 
@@ -37,7 +37,8 @@ class StartUp:
         # init singletons to prevent concurrent issues later
         if config.outbound_config.direct_connect_cn is True:
             DomainTrie.get_instance()
-        LRU.get_instance()
+        if config.inbound_config.protocol == ProtocolEnum.BTP:
+            LRU.get_instance()
 
     def start(self, config: Config):
         print('listening on ',
