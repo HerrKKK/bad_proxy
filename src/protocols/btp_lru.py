@@ -17,11 +17,6 @@ class CacheData:
 
 
 class LRU:
-    __cache: set = set()
-    __lock: Lock = Lock()
-
-    __head: CacheData  # newest
-    __tail: CacheData  # oldest
     """
     BTP enforce a 210s timeout while the time has a 30s fluctuation
     compared with the real time which means a valid package received
@@ -33,6 +28,13 @@ class LRU:
     When the lru size is 200000, __cache takes 8388824 (8M) memory,
     Total memory taken under 240000 data will be 90~MB, acceptable!
     """
+    __instance: LRU = None
+    __cache: set = set()
+    __lock: Lock = Lock()
+
+    __head: CacheData  # newest
+    __tail: CacheData  # oldest
+
     __max_size: int = 240000
     __size: int = 0
 
@@ -43,6 +45,13 @@ class LRU:
         self.__head = CacheData()
         self.__tail = CacheData(None, self.__head)
         self.__head.next = self.__tail
+
+    @classmethod
+    def get_instance(cls):
+        # NOT thread safe
+        if cls.__instance is None:
+            cls.__instance = LRU()
+        return cls.__instance
 
     def add(self, data):
         self.__lock.acquire()

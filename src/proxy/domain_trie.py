@@ -21,7 +21,7 @@ class DomainTrie:
 
     @classmethod
     def get_instance(cls):
-        # singleton
+        # NOT thread safe
         if cls.__instance is None:
             cls.__instance = DomainTrie()
             cls.__instance.__read_from_file()
@@ -49,7 +49,7 @@ class DomainTrie:
             self.__read_from_file(fn)
 
     def __add(self, s: str):
-        # thread NOT safe
+        # NOT thread safe
         if s is None or len(s) == 0:
             return
         # use iteration to improve performance

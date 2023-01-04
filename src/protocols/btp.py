@@ -7,9 +7,6 @@ from uuid import UUID
 from enum import IntEnum
 from .btp_lru import LRU
 
-secret_generator = secrets.SystemRandom()
-btp_lru = LRU()  # global singleton
-
 
 class BTPRequest:
     body: bytes
@@ -106,6 +103,8 @@ class BTP:
     RESPONSE_CONFUSION_LEN = (64, 128)
     TIMEOUT = 210
 
+    __secret_generator = secrets.SystemRandom()
+
     @staticmethod
     def inbound_connect(inbound_socket: socket,
                         inbound_uuid: str,
@@ -124,19 +123,20 @@ class BTP:
         if btp_request.directive != BTPDirective.CONNECT:
             raise BTPException('wrong directive', raw_data)
 
-        btp_lru.add(btp_request.digest)
+        LRU.get_instance().add(btp_request.digest)
 
         return (btp_request.host.encode(),
                 btp_request.port,
                 btp_request.payload)  # to be sent immediately
 
-    @staticmethod
-    def encode_request(host: str,
+    @classmethod
+    def encode_request(cls,
+                       host: str,
                        port: int,
                        uuid_str: str,
                        direct: BTPDirective = BTPDirective.CONNECT,
                        payload: bytes | None = b'') -> bytes:
-        confusion_len = secret_generator.randint(*BTP.REQUEST_CONFUSION_LEN)
+        confusion_len = cls.__secret_generator.randint(*BTP.REQUEST_CONFUSION_LEN)
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
 
@@ -146,7 +146,7 @@ class BTP:
         it's a bit hard to implement
         """
         timestamp = (int(time.time())
-                     + secret_generator.randint(0, 60)
+                     + cls.__secret_generator.randint(0, 60)
                      - 30).to_bytes(4, 'big')
 
         directive = int(direct).to_bytes(1, 'big')
@@ -166,13 +166,13 @@ class BTP:
         digest = hmac.new(UUID(uuid_str).bytes, body, 'sha256').digest()
         return digest + body
 
-    @staticmethod
-    def encode_response(data) -> bytes:
+    @classmethod
+    def encode_response(cls, data) -> bytes:
         """
         :param data: plain bytes
         :return: BTP form response
         """
-        confusion_len = secret_generator.randint(*BTP.RESPONSE_CONFUSION_LEN)
+        confusion_len = cls.__secret_generator.randint(*BTP.RESPONSE_CONFUSION_LEN)
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
         return confusion_len + confusion + data
