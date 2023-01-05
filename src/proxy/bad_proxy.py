@@ -6,7 +6,7 @@ from .inbound import Inbound
 from .outbound import Outbound
 
 
-class BadProxy(object):
+class BadProxy:
     def __init__(self, config: Config):
         self.inbound = Inbound(config.inbound_config)
         self.outbound = Outbound(config.outbound_config)
@@ -33,10 +33,9 @@ class BadProxy(object):
     def async_listen(self):
         is_recv = True
         while is_recv:
-            rlist, _, elist = select.select([self.inbound.socket,
-                                             self.outbound.socket],
-                                            [], [], 2)
-            assert len(elist) == 0
+            rlist, _, _ = select.select([self.inbound.socket,
+                                         self.outbound.socket],
+                                        [], [], 2)
             for sock in rlist:
                 is_recv = True
                 data = sock.recv(8192)
