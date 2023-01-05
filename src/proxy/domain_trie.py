@@ -11,6 +11,7 @@ class DomainTrie:
     __DATA_FOLDER = 'domains/'
     __LEN: int = 128  # ascii
     __nodes: list[DomainTrie | None]  # None means not exist
+    __is_end: bool = False
     __instance: DomainTrie = None
 
     def __init__(self):
@@ -53,27 +54,28 @@ class DomainTrie:
         if s is None or len(s) == 0:
             return
         # use iteration to improve performance
-        idx, pos, length, __nodes = 0, 0, len(s), self.__nodes
+        idx, pos, length, this = 0, 0, len(s), self
         while idx < length:
             pos = ord(s[idx])
-            if __nodes[pos] is None:
-                __nodes[pos] = DomainTrie()
-            __nodes = __nodes[pos].__nodes
+            if this.__nodes[pos] is None:
+                this.__nodes[pos] = DomainTrie()
+            this = this.__nodes[pos]
             idx += 1  # idx is index of s, pos is position of char in map
+        this.__is_end = True
 
     def has(self, s: str) -> bool:
         if s is None or len(s) == 0:
             return False
 
-        idx, pos, length, __nodes = 0, 0, len(s), self.__nodes
+        idx, pos, length, this = 0, 0, len(s), self
         while idx < length:
             pos = ord(s[idx])
-            if __nodes[pos] is None:
+            if this.__nodes[pos] is None:
                 return False
-            __nodes = __nodes[pos].__nodes
+            this = this.__nodes[pos]
             idx += 1
 
-        return True
+        return this.__is_end
 
     def has_domain(self, domain: str):
         try:
