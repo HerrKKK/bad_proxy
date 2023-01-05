@@ -6,7 +6,7 @@ from ssl import SSLContext
 from protocols import ProtocolEnum
 from config import OutboundConfig
 from protocols import BTP, BTPDirective
-from .domain_trie import DomainTrie
+from .domain_cache import DomainCache
 
 
 class Outbound:
@@ -62,7 +62,7 @@ class Outbound:
 
         # The domain trie will not init automatically, do not need to check if enabled
         if self.direct_connect_cn is True \
-                and DomainTrie.get_instance().has_domain(self.target_host):
+                and DomainCache.get_instance().has_domain(self.target_host):
             self.protocol = ProtocolEnum.FREEDOM
 
         if self.protocol == ProtocolEnum.FREEDOM:

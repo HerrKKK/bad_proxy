@@ -6,7 +6,7 @@ import threading
 
 from ssl import SSLContext
 from protocols import LRU, ProtocolEnum
-from proxy import BadProxy, DomainTrie
+from proxy import BadProxy, DomainCache
 from config import Config
 
 
@@ -36,7 +36,7 @@ class StartUp:
                                                          server_side=True)
         # init singletons to prevent concurrent issues later
         if config.outbound_config.direct_connect_cn is True:
-            DomainTrie.get_instance()
+            DomainCache.get_instance()
         if config.inbound_config.protocol == ProtocolEnum.BTP:
             LRU.get_instance()
 
