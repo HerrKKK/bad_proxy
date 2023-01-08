@@ -49,7 +49,6 @@ class Outbound:
          target_addr) = socket.getaddrinfo(self.host, self.port)[0]
 
         self.unsafe_socket = socket.socket(family, socket_type)
-        self.unsafe_socket.setblocking(False)
         self.unsafe_socket.settimeout(10)
         self.unsafe_socket.connect(target_addr)
         self.socket = self.unsafe_socket
