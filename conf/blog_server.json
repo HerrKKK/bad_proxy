@@ -5,8 +5,8 @@
     "protocol": "btp",
     "uuid": "62d7a00c-965b-42fc-81a1-e020e7c21f94",
     "tls": true,
-    "tls_cert_path": "/etc/letsencrypt/live/wwr-blog.com/fullchain.pem",
-    "tls_key_path": "/etc/letsencrypt/live/wwr-blog.com/privkey.pem"
+    "tls_cert_path": "/etc/letsencrypt/live/bp.thisiswwr.com/fullchain.pem",
+    "tls_key_path": "/etc/letsencrypt/live/bp.thisiswwr.com/privkey.pem"
   },
   "outbound": {
     "protocol": "freedom"
