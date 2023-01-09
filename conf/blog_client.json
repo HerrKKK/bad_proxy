@@ -5,8 +5,8 @@
     "protocol": "http"
   },
   "outbound": {
-    "host": "wwr-blog.com",
-    "port": 9999,
+    "host": "bp.thisiswwr.com",
+    "port": 443,
     "protocol": "btp",
     "uuid": "62d7a00c-965b-42fc-81a1-e020e7c21f94",
     "tls": true,
