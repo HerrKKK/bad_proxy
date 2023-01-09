@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['src/main.py'],
-    pathex=['C:/Users/wang.weiran/Documents/code/wproxy/src'],
+    pathex=['./src'],
     binaries=[],
     datas=[('conf/config.json', 'conf'),
     ('domains/*', 'domains')],
