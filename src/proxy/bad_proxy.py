@@ -1,9 +1,9 @@
 import select
 
 from config import Config
-from protocols import BTPException, HttpRequest
 from .inbound import Inbound
 from .outbound import Outbound
+from protocols import BTPException, HttpRequest
 
 
 class BadProxy:

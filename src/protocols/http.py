@@ -41,7 +41,8 @@ class HttpRequest(object):
 class HTTP:
     @staticmethod
     def inbound_connect(inbound_socket: socket,
-                        buff_size: int | None = 8192) -> (str, int, bytes):
+                        buff_size: int | None = 8192
+                        ) -> (str, int, bytes):
         raw_data = inbound_socket.recv(buff_size)
         if raw_data == b'':
             print('inbound received none data')
@@ -50,18 +51,24 @@ class HTTP:
         http_request = HttpRequest(raw_data)
 
         # remove proxy hostname
-        tmp = b'%s//%s' % (http_request.req_uri.split(b'//')[0], http_request.host)
+        tmp = b'%s//%s' % (http_request.req_uri.split(b'//')[0],
+                           http_request.host)
         raw_data = raw_data.replace(tmp, b'')
 
         # HTTPS
         if http_request.method == b'CONNECT':
-            success_msg = b'%s %d Connection Established\r\nConnection: close\r\n\r\n' \
-                          % (http_request.version, 200)
+            success_msg = (
+                    b'%s %d Connection Established\r\nConnection: close\r\n\r\n'
+                    % (http_request.version, 200)
+            )
             inbound_socket.send(success_msg)
             raw_data = inbound_socket.recv(buff_size)
 
-        server_host, server_port = http_request.host.split(b':') \
-            if b':' in http_request.host else (http_request.host, 80)
+        server_host, server_port = (
+            http_request.host.split(b':')
+            if b':' in http_request.host
+            else (http_request.host, 80)
+        )
 
         if isinstance(server_port, bytes):
             server_port = int(server_port.decode())

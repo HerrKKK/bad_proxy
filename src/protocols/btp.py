@@ -1,24 +1,24 @@
 import hmac
-import socket
 import secrets
+import socket
 import time
-
-from uuid import UUID
 from enum import IntEnum
+from uuid import UUID
+
 from .btp_lru import LRU
 
 
 class BTPRequest:
     body: bytes
-    digest: bytes         # 32 Bytes
-    timestamp: int        # 4 Bytes
-    confusion_len: int    # 1 Byte
+    digest: bytes  # 32 Bytes
+    timestamp: int  # 4 Bytes
+    confusion_len: int  # 1 Byte
     confusion_msg: bytes  # [0, 48] Bytes
-    directive: int        # 1 Bytes
-    host_len: int         # 1 Byte
-    host: str             # [1, 254) Bytes
-    port: int             # 2 Bytes
-    payload: bytes        # fixed length is 41
+    directive: int  # 1 Bytes
+    host_len: int  # 1 Byte
+    host: str  # [1, 254) Bytes
+    port: int  # 2 Bytes
+    payload: bytes  # fixed length is 41
 
     __startup_time: int = time.time()
 
@@ -28,16 +28,16 @@ class BTPRequest:
     def __parse(self, data: bytes):
         base = 0
 
-        self.digest = data[base: base + 32]
+        self.digest = data[base:base + 32]
         base += 32
         self.body = data[base:]
 
-        self.confusion_len = int.from_bytes(data[base: base + 1],
+        self.confusion_len = int.from_bytes(data[base:base + 1],
                                             byteorder='big',
                                             signed=False)
         base += 1 + self.confusion_len
 
-        self.timestamp = int.from_bytes(data[base: base + 4],
+        self.timestamp = int.from_bytes(data[base:base + 4],
                                         byteorder='big',
                                         signed=False)
         if self.timestamp < BTPRequest.__startup_time \
@@ -45,12 +45,12 @@ class BTPRequest:
             raise BTPException('timeout', data)
         base += 4
 
-        self.directive = int.from_bytes(data[base: base + 1],
+        self.directive = int.from_bytes(data[base:base + 1],
                                         byteorder='big',
                                         signed=False)
         base += 1
 
-        self.host_len = int.from_bytes(data[base: base + 1],
+        self.host_len = int.from_bytes(data[base:base + 1],
                                        byteorder='big',
                                        signed=False)
         base += 1
@@ -58,7 +58,7 @@ class BTPRequest:
         self.host = data[base: base + self.host_len].decode(encoding='utf-8')
         base += self.host_len
 
-        self.port = int.from_bytes(data[base: base + 2],
+        self.port = int.from_bytes(data[base:base + 2],
                                    byteorder='big',
                                    signed=False)
         base += 2
@@ -119,9 +119,11 @@ class BTP:
 
         btp_request = BTPRequest(raw_data)
 
-        if btp_request.digest != hmac.new(UUID(inbound_uuid).bytes,
-                                          btp_request.body,
-                                          'sha256').digest():
+        if btp_request.digest != hmac.new(
+                UUID(inbound_uuid).bytes,
+                btp_request.body,
+                'sha256'
+        ).digest():
             raise BTPException('btp auth failure', raw_data)
         if btp_request.directive != BTPDirective.CONNECT:
             raise BTPException('wrong directive', raw_data)
@@ -139,7 +141,9 @@ class BTP:
                        uuid_str: str,
                        direct: BTPDirective = BTPDirective.CONNECT,
                        payload: bytes | None = b'') -> bytes:
-        confusion_len = cls.__secret_generator.randint(*BTP.REQUEST_CONFUSION_LEN)
+        confusion_len = cls.__secret_generator.randint(
+            *BTP.REQUEST_CONFUSION_LEN
+        )
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
 
@@ -157,14 +161,14 @@ class BTP:
         host_len = len(host_bytes).to_bytes(1, 'big')
         port_bytes = port.to_bytes(2, 'big')
 
-        body = confusion_len \
-            + confusion \
-            + timestamp \
-            + directive \
-            + host_len \
-            + host_bytes \
-            + port_bytes \
-            + payload
+        body = (confusion_len
+                + confusion
+                + timestamp
+                + directive
+                + host_len
+                + host_bytes
+                + port_bytes
+                + payload)
 
         digest = hmac.new(UUID(uuid_str).bytes, body, 'sha256').digest()
         return digest + body
@@ -175,7 +179,9 @@ class BTP:
         :param data: plain bytes
         :return: BTP form response
         """
-        confusion_len = cls.__secret_generator.randint(*BTP.RESPONSE_CONFUSION_LEN)
+        confusion_len = cls.__secret_generator.randint(
+            *BTP.RESPONSE_CONFUSION_LEN
+        )
         confusion = secrets.token_bytes(nbytes=confusion_len)
         confusion_len = confusion_len.to_bytes(1, 'big')
         return confusion_len + confusion + data
