@@ -40,8 +40,10 @@ class BTPRequest:
         self.timestamp = int.from_bytes(data[base:base + 4],
                                         byteorder='big',
                                         signed=False)
-        if self.timestamp < BTPRequest.__startup_time \
-                or abs(int(time.time()) - self.timestamp) > BTP.TIMEOUT:
+        if (
+            self.timestamp < BTPRequest.__startup_time
+            or abs(int(time.time()) - self.timestamp) > BTP.TIMEOUT
+        ):
             raise BTPException('timeout', data)
         base += 4
 
