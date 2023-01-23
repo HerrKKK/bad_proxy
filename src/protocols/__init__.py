@@ -1,4 +1,4 @@
-from .btp import BTP, BTPRequest, BTPResponse, BTPException, BTPDirective
+from .btp import BTP, BTPDirective, BTPException, BTPRequest, BTPResponse
 from .http import HTTP, HttpRequest
 from .btp_lru import LRU
 

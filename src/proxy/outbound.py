@@ -1,13 +1,10 @@
 from __future__ import annotations
 import re
-import ssl
 import socket
+import ssl
 
-from ssl import SSLContext
-
-from protocols import ProtocolEnum
 from config import OutboundConfig
-from protocols import BTP, BTPDirective
+from protocols import BTP, BTPDirective, ProtocolEnum
 
 
 class Outbound:
@@ -19,7 +16,7 @@ class Outbound:
     tls: bool
     unsafe_socket: socket = None
     socket: socket = None
-    context: SSLContext
+    context: ssl.SSLContext
     target_host: str
     target_port: int
     direct_connect_cn: bool = False
@@ -74,8 +71,9 @@ class Outbound:
         self.socket_connect()
 
         if self.tls is True and self.protocol is not ProtocolEnum.FREEDOM:
-            self.socket = self.context.wrap_socket(self.unsafe_socket,
-                                                   server_hostname=self.host)
+            self.socket = self.context.wrap_socket(
+                self.unsafe_socket, server_hostname=self.host
+            )
 
         if self.protocol is ProtocolEnum.BTP:  # btp outbound connect
             payload = BTP.encode_request(target_host,

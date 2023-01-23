@@ -1,39 +1,47 @@
-import sys
-import ssl
-import socket
 import getopt
 import threading
+import socket
+import ssl
+import sys
 
-from ssl import SSLContext
+from config import Config
 from protocols import LRU, ProtocolEnum
 from proxy import BadProxy, DomainCache
-from config import Config
 
 
 class StartUp:
     socket_proxy: socket = None
     socket_proxy_unsafe: socket
-    context: SSLContext
+    context: ssl.SSLContext
 
     def __del__(self):
         self.socket_proxy.close()
 
     def init(self, config: Config):
-        self.socket_proxy_unsafe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket_proxy_unsafe = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM
+        )
         # recycle the port after socket closed
-        self.socket_proxy_unsafe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket_proxy_unsafe.bind((config.inbound_config.host,
-                                       config.inbound_config.port))
+        self.socket_proxy_unsafe.setsockopt(
+            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+        )
+        self.socket_proxy_unsafe.bind(
+            (config.inbound_config.host, config.inbound_config.port)
+        )
         self.socket_proxy_unsafe.listen(10)
         self.socket_proxy = self.socket_proxy_unsafe
 
         if config.inbound_config.tls is True:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            self.context.load_cert_chain(config.inbound_config.tls_cert_path,
-                                         config.inbound_config.tls_key_path)
+            self.context.load_cert_chain(
+                config.inbound_config.tls_cert_path,
+                config.inbound_config.tls_key_path
+            )
 
-            self.socket_proxy = self.context.wrap_socket(self.socket_proxy_unsafe,
-                                                         server_side=True)
+            self.socket_proxy = self.context.wrap_socket(
+                self.socket_proxy_unsafe,
+                server_side=True
+            )
         # init singletons to prevent concurrent issues later
         if config.outbound_config.direct_connect_cn is True:
             DomainCache.get_instance()
