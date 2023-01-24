@@ -33,9 +33,9 @@ class BadProxy:
     def async_listen(self):
         is_recv = True
         while is_recv:
-            rlist, _, _ = select.select([self.inbound.socket,
-                                         self.outbound.socket],
-                                        [], [], 2)
+            rlist, _, _ = select.select(
+                [self.inbound.socket, self.outbound.socket], [], [], 2
+            )
             for sock in rlist:
                 is_recv = True
                 data = sock.recv(8192)

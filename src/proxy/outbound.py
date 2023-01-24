@@ -51,16 +51,20 @@ class Outbound:
         self.unsafe_socket.connect(target_addr)
         self.socket = self.unsafe_socket
 
-    def connect(self,
-                target_host: str,
-                target_port: int,
-                payload: bytes | None = b''):
+    def connect(
+        self,
+        target_host: str,
+        target_port: int,
+        payload: bytes | None = b''
+    ):
         self.target_host = target_host  # hostname or address
         self.target_port = target_port
 
         # The domain trie will not init automatically, do not need to check if enabled
-        if self.direct_connect_cn is True \
-                and DomainCache.get_instance().has_domain(self.target_host):
+        if (
+            self.direct_connect_cn is True
+            and DomainCache.get_instance().has_domain(self.target_host)
+        ):
             self.protocol = ProtocolEnum.FREEDOM
 
         if self.protocol == ProtocolEnum.FREEDOM:
@@ -76,11 +80,13 @@ class Outbound:
             )
 
         if self.protocol is ProtocolEnum.BTP:  # btp outbound connect
-            payload = BTP.encode_request(target_host,
-                                         target_port,
-                                         self.uuid,
-                                         BTPDirective.CONNECT,
-                                         payload)
+            payload = BTP.encode_request(
+                target_host,
+                target_port,
+                self.uuid,
+                BTPDirective.CONNECT,
+                payload
+            )
 
         # whether to send the first package from inbound
         if payload is not None:

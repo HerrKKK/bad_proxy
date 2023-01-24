@@ -49,9 +49,11 @@ class StartUp:
             LRU.get_instance()
 
     def start(self, config: Config):
-        print('listening on ',
-              config.inbound_config.host,
-              config.inbound_config.port)
+        print(
+            'listening on ',
+            config.inbound_config.host,
+            config.inbound_config.port
+        )
         while True:
             try:
                 instance = BadProxy(config)

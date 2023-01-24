@@ -7,10 +7,12 @@ class CacheData:
     prev: CacheData
     next: CacheData
 
-    def __init__(self,
-                 data: any = None,
-                 prev_node: CacheData | None = None,
-                 next_node: CacheData | None = None):
+    def __init__(
+        self,
+        data: any = None,
+        prev_node: CacheData | None = None,
+        next_node: CacheData | None = None
+    ):
         self.data = data
         self.prev = prev_node
         self.next = next_node

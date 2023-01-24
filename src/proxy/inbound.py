@@ -25,12 +25,13 @@ class Inbound:
     def connect(self) -> (str, int, bytes):
         match self.protocol:
             case ProtocolEnum.HTTP:
-                return HTTP.inbound_connect(self.socket,
-                                            self.buff_size)
+                return HTTP.inbound_connect(
+                    self.socket, self.buff_size
+                )
             case ProtocolEnum.BTP:
-                return BTP.inbound_connect(self.socket,
-                                           self.uuid,
-                                           self.buff_size)
+                return BTP.inbound_connect(
+                    self.socket, self.uuid, self.buff_size
+                )
 
     def close(self):
         if self.socket is not None:
