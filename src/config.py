@@ -1,4 +1,5 @@
 import json
+import os
 
 from protocols import ProtocolEnum
 
@@ -38,8 +39,18 @@ class InboundConfig(BoundConfig):
         **kwargs
     ):
         super().__init__(**kwargs)
-        self.tls_cert_path = tls_cert_path
-        self.tls_key_path = tls_key_path
+        env_cert_path = os.getenv('TLS_CERT_PATH')
+        env_key_path = os.getenv('TLS_KEY_PATH')
+        self.tls_cert_path = (
+            tls_cert_path
+            if env_cert_path is None
+            else env_cert_path
+        )
+        self.tls_key_path = (
+            tls_key_path
+            if env_key_path is None
+            else env_key_path
+        )
 
 
 class OutboundConfig(BoundConfig):
