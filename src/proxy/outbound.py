@@ -40,10 +40,9 @@ class Outbound:
     def socket_connect(self):
         # getaddrinfo -> [(family, socket_type, proto, canonname, target_addr),]
         # if target
-        (family,
-         socket_type,
-         _, _,
-         target_addr) = socket.getaddrinfo(self.host, self.port)[0]
+        family, socket_type, _, _, target_addr = socket.getaddrinfo(
+            self.host, self.port
+        )[0]
 
         self.unsafe_socket = socket.socket(family, socket_type)
         self.unsafe_socket.setblocking(False)
@@ -147,6 +146,5 @@ class DomainCache:
         try:
             domains = domain.split('.')
             return f'{domains[-2]}.{domains[-1]}' in self.__set
-        except Exception as e:
-            print(e)
+        except (Exception,):
             return False

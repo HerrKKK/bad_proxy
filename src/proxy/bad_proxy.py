@@ -34,7 +34,10 @@ class BadProxy:
         is_recv = True
         while is_recv:
             rlist, _, _ = select.select(
-                [self.inbound.socket, self.outbound.socket], [], [], 2
+                [
+                    self.inbound.socket,
+                    self.outbound.socket
+                ], [], [], 2
             )
             for sock in rlist:
                 is_recv = True

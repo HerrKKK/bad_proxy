@@ -63,9 +63,9 @@ class LRU:
 
         self.__cache.add(data)
 
-        new_data = CacheData(data,
-                             self.__head,
-                             self.__head.next)
+        new_data = CacheData(
+            data, self.__head, self.__head.next
+        )
 
         self.__head.next = new_data
         if new_data.next is not None:

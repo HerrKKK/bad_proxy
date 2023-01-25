@@ -81,9 +81,9 @@ class BTPResponse:
     def __parse(self, data: bytes):
         base = 0
 
-        self.confusion_len = int.from_bytes(data[:1],
-                                            byteorder='big',
-                                            signed=False)
+        self.confusion_len = int.from_bytes(
+            data[:1], byteorder='big', signed=False
+        )
         base += 1 + self.confusion_len
 
         self.payload = data[base:]
@@ -124,9 +124,9 @@ class BTP:
         btp_request = BTPRequest(raw_data)
 
         if btp_request.digest != hmac.new(
-                UUID(inbound_uuid).bytes,
-                btp_request.body,
-                'sha256'
+            UUID(inbound_uuid).bytes,
+            btp_request.body,
+            'sha256'
         ).digest():
             raise BTPException('btp auth failure', raw_data)
         if btp_request.directive != BTPDirective.CONNECT:
@@ -158,9 +158,11 @@ class BTP:
         all possible hash value in server to verify
         it's a bit hard to implement
         """
-        timestamp = (int(time.time())
-                     + cls.__secret_generator.randint(0, 60)
-                     - 30).to_bytes(4, 'big')
+        timestamp = (
+            int(time.time())
+            + cls.__secret_generator.randint(0, 60)
+            - 30
+        ).to_bytes(4, 'big')
 
         directive = int(direct).to_bytes(1, 'big')
         host_bytes = host.encode(encoding='utf-8')

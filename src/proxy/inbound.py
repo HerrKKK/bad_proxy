@@ -43,8 +43,10 @@ class Inbound:
             <p>This route is deprecated, please visit https://wwr-blog.com/<p>
             </body></html>
         '''
-        headers = (b'HTTP/1.1 200 OK\r\n'
-                   + b'Content-Type: text/html\r\n'
-                   + b'Content-Length: ' + str(len(body)).encode()
-                   + b'Connection: close \r\n\r\n')
+        headers = (
+                b'HTTP/1.1 200 OK\r\n'
+                + b'Content-Type: text/html\r\n'
+                + b'Content-Length: ' + str(len(body)).encode()
+                + b'Connection: close \r\n\r\n'
+        )
         self.socket.send(headers + body)

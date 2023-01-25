@@ -23,8 +23,10 @@ class BoundConfig:
         self.host = host
         self.port = port
         self.protocol = ProtocolEnum.interpret_string(protocol)
-        self.uuid = uuid.replace('-', '').replace(' ', '') \
+        self.uuid = (
+            uuid.replace('-', '').replace(' ', '')
             if uuid is not None else None
+        )
         self.tls = tls
 
 

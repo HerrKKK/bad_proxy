@@ -60,8 +60,8 @@ class HTTP:
         # HTTPS
         if http_request.method == b'CONNECT':
             success_msg = (
-                    b'%s %d Connection Established\r\nConnection: close\r\n\r\n'
-                    % (http_request.version, 200)
+                b'%s %d Connection Established\r\nConnection: close\r\n\r\n'
+                % (http_request.version, 200)
             )
             inbound_socket.send(success_msg)
             raw_data = inbound_socket.recv(buff_size)
